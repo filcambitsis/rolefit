@@ -9,3 +9,10 @@ web/.next
 data/private
 data/cache
 **/__pycache__
+web/.next-dev
+.pytest_cache
+.ruff_cache
+**/*.egg-info
+.vscode
+web/.openai
+**/.DS_Store

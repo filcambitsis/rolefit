@@ -3,3 +3,7 @@ node_modules
 out
 .env*
 .sites-runtime
+.next-dev
+.openai
+*.tsbuildinfo
+.DS_Store

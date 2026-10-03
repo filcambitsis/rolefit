@@ -1,0 +1,18 @@
+{
+  "files.exclude": {
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/__pycache__": true,
+    "**/*.egg-info": true,
+    "**/*.tsbuildinfo": true,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/.next-dev": true,
+    "**/.sites-runtime": true,
+    ".venv": true,
+    "work": true,
+    "web/out": true,
+    "web/.openai": true,
+    "web/next-env.d.ts": true
+  }
+}

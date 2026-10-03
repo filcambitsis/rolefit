@@ -14,7 +14,9 @@ from .models import Budget, ExtractionCache
 from .normalization import minimum_years
 from .skills import mentions, normalize_skill
 
-PROMPT_VERSION = "evidence-v1"
+# Bump this when extraction rules or the skills vocabulary change:
+# stored requirements with an older version are extracted again.
+PROMPT_VERSION = "evidence-v2"
 MAX_TEXT = 150_000
 
 
@@ -40,12 +42,6 @@ class RequirementItem(BaseModel):
 class StructuredRequirements(BaseModel):
     model_config = ConfigDict(extra="forbid")
     items: list[RequirementItem]
-
-
-class Adjudication(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    met: bool
-    evidence_quote: str | None
 
 
 def parse_file(data: bytes, filename: str) -> str:

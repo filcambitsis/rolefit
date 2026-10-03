@@ -28,7 +28,6 @@ export type Job = {
   provider: string;
   url: string;
   score: number;
-  rank_score?: number;
   required_coverage: number;
   requirements: Requirement[];
   description?: string;
@@ -48,7 +47,6 @@ export const families = [
   "ML Engineer",
   "Data Scientist",
   "Data Analyst",
-  "AI/Technology Consultant",
 ];
 export const defaults: Preferences = {
   families: [],
@@ -57,6 +55,15 @@ export const defaults: Preferences = {
   workplace: "any",
   search: "",
 };
+// Fill in missing fields and drop role families that no longer exist,
+// so preferences saved by an older version still work.
+export function cleanPreferences(saved: Partial<Preferences>): Preferences {
+  return {
+    ...defaults,
+    ...saved,
+    families: (saved.families ?? []).filter((f) => families.includes(f)),
+  };
+}
 export const sampleCV = `Alex Morgan\nMachine Learning Engineer\n\nEXPERIENCE\nMachine Learning Engineer · Northstar Labs · Jan 2022 – Dec 2025\nBuilt Python services for document search and retrieval-augmented generation.\nTrained PyTorch models and deployed inference APIs with FastAPI and Docker.\nDesigned SQL reporting pipelines over a PostgreSQL warehouse.\nShipped production workloads on AWS with automated model monitoring.\nCollaborated with product teams to design experiments and evaluate model quality.\n\nEDUCATION\nMSc Computer Science · 2020 – 2022\n\nPROJECTS\nBuilt a semantic search tool using embeddings, vector databases and natural language processing.\nCreated interactive dashboards using Python, pandas and data visualization.\n\nLANGUAGES\nEnglish: fluent\n`;
 export const skillTerms: Record<string, string[]> = {
   Python: ["python"],
@@ -168,16 +175,6 @@ const templates = [
     "on-site",
     ["Python", "Docker", "Kubernetes", "AWS"],
     ["PyTorch", "Spark"],
-  ],
-  [
-    "Fieldwork",
-    "AI & Technology Consultant",
-    "Rotterdam, Netherlands",
-    "NL",
-    "AI/Technology Consultant",
-    "hybrid",
-    ["Python", "Stakeholder management", "Azure"],
-    ["SQL", "RAG"],
   ],
   [
     "Aperture",

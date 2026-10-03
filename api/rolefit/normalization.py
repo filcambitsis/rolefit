@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from langdetect import DetectorFactory, LangDetectException, detect
 
 DetectorFactory.seed = 42
-FAMILIES = ["AI Engineer", "ML Engineer", "Data Scientist", "Data Analyst", "AI/Technology Consultant"]
+FAMILIES = ["AI Engineer", "ML Engineer", "Data Scientist", "Data Analyst"]
 
 
 def strip_html(value: str) -> str:
@@ -21,9 +21,8 @@ def content_hash(text: str) -> str:
 
 
 def family(title: str) -> str | None:
+    """Role family from the job title, or None if the job is out of scope."""
     value = title.lower()
-    if re.search(r"consult", value) and re.search(r"\b(ai|data|technology|digital|analytics)\b", value):
-        return FAMILIES[4]
     if re.search(r"data scien|research scien|applied scien", value):
         return FAMILIES[2]
     if re.search(

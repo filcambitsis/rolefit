@@ -1,47 +1,54 @@
-"""Exercise a local development API with a clearly synthetic sample CV."""
+"""Check the main flow against a running local API, using the fictional sample CV.
+
+Usage: start the API (make run-api), then run .venv/bin/python scripts/smoke_api.py
+"""
 
 import json
+import os
 from pathlib import Path
+
 import httpx
 
-base = "http://127.0.0.1:8000"
-fixture = json.loads(Path("data/personas/ml-engineer.json").read_text())
-with httpx.Client(base_url=base, timeout=90) as client:
+BASE = os.environ.get("API_URL", "http://127.0.0.1:8000")
+CV_TEXT = (Path(__file__).resolve().parents[1] / "data/sample-cv.txt").read_text()
+
+with httpx.Client(base_url=BASE, timeout=90) as client:
     assert client.get("/health").status_code == 200
-    response = client.post(
-        "/cv", files={"file": ("Sample CV - replace with your own.txt", fixture["text"], "text/plain")}
-    )
+
+    # 1. Upload the CV.
+    response = client.post("/cv", files={"file": ("sample-cv.txt", CV_TEXT, "text/plain")})
     response.raise_for_status()
     parsed = response.json()
-    assert client.put("/preferences", json=fixture["preferences"]).status_code == 200
+
+    # 2. Reset preferences and run matching.
+    client.put("/preferences", json={}).raise_for_status()
     response = client.post("/matches")
     response.raise_for_status()
     jobs = response.json()["jobs"]
-    assert len(jobs) >= 200
+    assert jobs, "No jobs matched; run make crawl first"
+
+    # 3. Every "met" requirement must point at an exact passage of the CV.
     for job in jobs:
         for requirement in job["requirements"]:
             if requirement["status"] == "met":
                 ev = requirement["evidence"]
-                assert fixture["text"][ev["start"] : ev["end"]] == ev["quote"]
-    job = jobs[0]
-    detail = client.get("/jobs/" + job["id"])
-    detail.raise_for_status()
-    assert detail.json()["description"]
-    decision = client.put("/jobs/" + job["id"] + "/decision", json={"state": "saved"})
-    decision.raise_for_status()
-    assert job["id"] in client.get("/me").json()["saved"]
-    client.put("/jobs/" + job["id"] + "/decision", json={"state": "none"}).raise_for_status()
+                assert CV_TEXT[ev["start"] : ev["end"]] == ev["quote"]
+
+    # 4. Job details, then save and unsave the top job.
+    job_id = jobs[0]["id"]
+    client.get("/jobs/" + job_id).raise_for_status()
+    client.put(f"/jobs/{job_id}/decision", json={"state": "saved"}).raise_for_status()
+    assert job_id in client.get("/me").json()["saved"]
+    client.put(f"/jobs/{job_id}/decision", json={"state": "none"}).raise_for_status()
+
     print(
         json.dumps(
             {
-                "upload": "passed",
-                "preferences": "passed",
-                "matching": "passed",
-                "candidate_count": len(jobs),
-                "evidence_invariant": "passed",
-                "detail": "passed",
-                "save": "passed",
-                "verification_failure_rate": parsed["failure_rate"],
-            }
+                "evidence_passages": len(parsed["evidence"]),
+                "jobs_matched": len(jobs),
+                "top_job": f"{jobs[0]['title']} at {jobs[0]['company']} ({jobs[0]['score']}%)",
+                "result": "passed",
+            },
+            indent=2,
         )
     )

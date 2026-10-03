@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -46,9 +45,6 @@ class Evidence(Base):
     end: Mapped[int] = mapped_column(Integer)
     section: Mapped[str] = mapped_column(String(50))
     skills: Mapped[list] = mapped_column(JSON, default=list)
-    embedding: Mapped[list | None] = mapped_column(
-        JSON().with_variant(Vector(768), "postgresql"), nullable=True
-    )
 
 
 class Job(Base):
@@ -75,9 +71,6 @@ class Job(Base):
     duplicate_of: Mapped[str | None] = mapped_column(String(36), nullable=True)
     first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
-    embedding: Mapped[list | None] = mapped_column(
-        JSON().with_variant(Vector(768), "postgresql"), nullable=True
-    )
 
 
 class Requirement(Base):
@@ -92,9 +85,6 @@ class Requirement(Base):
     min_years: Mapped[float | None] = mapped_column(Float, nullable=True)
     model_version: Mapped[str] = mapped_column(String(100))
     prompt_version: Mapped[str] = mapped_column(String(50))
-    embedding: Mapped[list | None] = mapped_column(
-        JSON().with_variant(Vector(768), "postgresql"), nullable=True
-    )
 
 
 class Decision(Base):

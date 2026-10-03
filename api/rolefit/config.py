@@ -20,7 +20,6 @@ class Settings(BaseSettings):
     llm_budget_usd: float = 5.0
     llm_input_usd_per_million: float = 5.0
     llm_output_usd_per_million: float = 20.0
-    embedding_model: str = "BAAI/bge-base-en-v1.5"
 
 
 @lru_cache

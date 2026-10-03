@@ -13,6 +13,8 @@ def vocabulary():
 
 
 def mentions(text):
+    """Vocabulary skills named in the text, e.g. "Built Python APIs" -> ["Python"]."""
+    # Negated lines ("no experience with Java") never count as evidence.
     if re.search(
         r"\b(no experience|not experienced|never used|not proficient|unfamiliar with)\b", text, re.I
     ):
@@ -24,20 +26,12 @@ def mentions(text):
     ]
 
 
-def normalize_skill(mention, embedder=None):
+def normalize_skill(mention):
+    """Map a skill name to its vocabulary label, allowing only near-exact spelling."""
     aliases = {a.casefold(): s["label"] for s in vocabulary()["skills"] for a in s["aliases"]}
     if mention.casefold() in aliases:
         return aliases[mention.casefold()], "alias"
     match = process.extractOne(mention.casefold(), aliases.keys(), scorer=fuzz.ratio)
     if match and match[1] >= 94 and len(mention) >= 5:
         return aliases[match[0]], "fuzzy"
-    if embedder:
-        import numpy as np
-
-        labels = [s["label"] for s in vocabulary()["skills"]]
-        vectors = embedder.embed(labels)
-        scores = vectors @ embedder.embed([mention])[0]
-        best = int(np.argmax(scores))
-        if scores[best] >= 0.88:
-            return labels[best], "embedding"
     return None, "unmapped"

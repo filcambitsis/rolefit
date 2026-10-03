@@ -1,31 +1,13 @@
 import re
 from datetime import datetime, timezone
 
-import numpy as np
-
-from .extraction import verified_span
-
-FEATURE_NAMES = [
-    "bm25",
-    "document_cosine",
-    "max_chunk_cosine",
-    "mean_chunk_cosine",
-    "required_coverage",
-    "preferred_coverage",
-    "critical_missing",
-    "years_gap",
-    "seniority_gap",
-    "education_satisfied",
-    "language_satisfied",
-    "freshness",
-]
-
 
 def evidence_dict(row):
     return {k: getattr(row, k) for k in ["id", "quote", "start", "end", "section", "skills"]}
 
 
 def valid_evidence(raw, row):
+    # Evidence counts only if it is still an exact, non-empty substring of the CV text.
     return (
         0 <= row.start < row.end <= len(raw)
         and raw[row.start : row.end] == row.quote
@@ -34,6 +16,10 @@ def valid_evidence(raw, row):
 
 
 def date_intervals(text, current=None):
+    """Find date ranges such as "Jan 2020 – Dec 2022" or "2021 - present".
+
+    Returns (start, end) pairs counted in months.
+    """
     current = current or datetime.now(timezone.utc)
     pattern = r"(?:(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+)?((?:19|20)\d{2})\s*[-–—]\s*(?:(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+)?((?:19|20)\d{2}|present|current)"
     months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
@@ -53,6 +39,7 @@ def date_intervals(text, current=None):
 
 
 def years_of_experience(evidence, current=None):
+    """Total years covered by experience passages; overlapping jobs count once."""
     intervals = sorted(
         interval
         for e in evidence
@@ -69,6 +56,7 @@ def years_of_experience(evidence, current=None):
 
 
 def education_level(text):
+    # Higher number = higher degree; 0 means no degree was recognised.
     if re.search(r"\b(ph\.?d|doctorate|doctoral)\b", text, re.I):
         return 8
     if re.search(r"\b(master|msc|m\.sc|mba)\b", text, re.I):
@@ -78,25 +66,21 @@ def education_level(text):
     return 0
 
 
-def seniority(text):
-    if re.search(r"\b(principal|staff|lead|head|director)\b", text, re.I):
-        return 3
-    if re.search(r"\b(senior|sr)\b", text, re.I):
-        return 2
-    if re.search(r"\b(junior|intern|graduate|entry)\b", text, re.I):
-        return 0
-    return 1
+def match_requirement(req, evidence, raw):
+    """Decide whether one job requirement is supported by a CV passage.
 
-
-def match_requirement(req, evidence, raw, db=None, adjudicate=False):
-    # Verify ownership upstream and exact offsets again here: there is no unchecked met path.
+    A requirement is "met" only when a verified CV passage supports it.
+    Everything else stays unverified; we never guess.
+    """
     valid = [e for e in evidence if valid_evidence(raw, e)]
     found, tier = None, "unverified"
     if req.skill:
+        # Skill requirements: a CV passage must mention the same vocabulary skill.
         found = next((e for e in valid if req.skill in e.skills), None)
         tier = "vocabulary"
         if found and req.min_years:
-            # Skill years must be attached to that skill; generic total experience is insufficient.
+            # "3+ years of Python" needs dates on a passage that mentions Python,
+            # not just enough total work experience.
             found = next(
                 (
                     e
@@ -108,31 +92,17 @@ def match_requirement(req, evidence, raw, db=None, adjudicate=False):
             )
             tier = "rules"
     elif req.category == "experience" and req.min_years is not None:
+        # General experience: one dated experience passage must cover the years.
         found = next(
             (e for e in valid if e.section == "experience" and years_of_experience([e]) >= req.min_years),
             None,
         )
         tier = "rules"
     elif req.category == "education":
+        # Degrees: the CV must show the same level or higher (e.g. MSc satisfies BSc).
         needed = education_level(req.quote)
         found = next((e for e in valid if needed and education_level(e.quote) >= needed), None)
         tier = "rules"
-    if found is None and adjudicate and req.category in ("other", "skill"):
-        from .extraction import Adjudication, cached_call
-        import json
-
-        prompt = json.dumps({"requirement": req.quote, "evidence": [e.quote for e in valid]})
-        result = cached_call(
-            db,
-            "adjudication:" + evidence[0].cv_id if evidence else "empty",
-            "adjudication",
-            prompt,
-            Adjudication,
-            "Does one CV passage substantiate this requirement? Use met=false when uncertain. If met, evidence_quote must be one exact complete passage supplied. Never judge years or education numerically.",
-        )
-        if result.met and result.evidence_quote and verified_span(raw, result.evidence_quote):
-            found = next((e for e in valid if e.quote == result.evidence_quote), None)
-            tier = "adjudication"
     return {
         "id": req.id,
         "text": req.text,
@@ -145,40 +115,6 @@ def match_requirement(req, evidence, raw, db=None, adjudicate=False):
 
 
 def coverage(decisions, required):
+    """Share of required (or preferred) requirements that are met, from 0 to 1."""
     rows = [r for r in decisions if r["required"] == required]
     return sum(r["status"] == "met" for r in rows) / len(rows) if rows else 0.0
-
-
-def features(job, requirements, evidence, cv_text, bm25_score=0.0, reference_date=None):
-    reference_date = reference_date or datetime.now(timezone.utc)
-    decisions = [match_requirement(r, evidence, cv_text) for r in requirements]
-    ev_vectors = np.array([e.embedding for e in evidence if e.embedding is not None])
-    req_vectors = np.array([r.embedding for r in requirements if r.embedding is not None])
-    doc_cos, maximum, mean = 0.0, 0.0, 0.0
-    if ev_vectors.size and req_vectors.size:
-        sims = ev_vectors @ req_vectors.T
-        maximum, mean = float(sims.max()), float(sims.max(axis=0).mean())
-        if job.embedding is not None:
-            pooled = ev_vectors.mean(axis=0)
-            pooled /= max(float(np.linalg.norm(pooled)), 1e-9)
-            doc_cos = float(pooled @ np.asarray(job.embedding))
-    years_required = max((r.min_years or 0 for r in requirements), default=0)
-    valid = [e for e in evidence if valid_evidence(cv_text, e)]
-    edu = [d for d, r in zip(decisions, requirements) if r.category == "education"]
-    lang = [d for d, r in zip(decisions, requirements) if r.category == "language"]
-    first_seen = job.first_seen.replace(tzinfo=timezone.utc)
-    vector = [
-        bm25_score,
-        doc_cos,
-        maximum,
-        mean,
-        coverage(decisions, True),
-        coverage(decisions, False),
-        sum(d["required"] and d["status"] == "missing" for d in decisions),
-        max(0.0, years_required - years_of_experience(valid, reference_date)),
-        max(0.0, seniority(job.title) - seniority(cv_text)),
-        float(all(d["status"] == "met" for d in edu)),
-        float(all(d["status"] == "met" for d in lang)),
-        float(np.exp(-max(0, (reference_date - first_seen).days) / 90)),
-    ]
-    return vector, decisions

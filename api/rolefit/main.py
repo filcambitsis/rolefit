@@ -6,14 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import delete, select, text
 from sqlalchemy.orm import Session
 
-from rolefit_ml.retrieval import BM25
-
 from .auth import current_user
 from .config import settings
 from .db import get_db
 from .extraction import PROMPT_VERSION, extract_cv, extract_requirements, parse_file
-from .matching import coverage, evidence_dict, features
+from .matching import coverage, evidence_dict, match_requirement
 from .models import CV, CrawlRun, Decision, Evidence, ExtractionCache, Job, Requirement, User
+from .normalization import FAMILIES
+from .ranking import bm25_scores
 from .schemas import DecisionInput, Preferences
 
 app = FastAPI(
@@ -34,12 +34,20 @@ def latest_cv(db, user):
     return db.scalar(select(CV).where(CV.user_id == user.id).order_by(CV.created_at.desc()))
 
 
+def saved_preferences(user):
+    # Ignore role families that no longer exist, so old saved preferences still load.
+    prefs = dict(user.preferences or {})
+    prefs["families"] = [f for f in prefs.get("families", []) if f in FAMILIES]
+    return Preferences.model_validate(prefs)
+
+
 def candidates(db, prefs):
+    """Open, English, de-duplicated jobs that pass the user's hard filters."""
     query = select(Job).where(
         Job.is_open.is_(True),
         Job.duplicate_of.is_(None),
         Job.language == "en",
-        Job.family.is_not(None),
+        Job.family.in_(FAMILIES),
         Job.employment.in_(prefs.employment),
     )
     if prefs.families:
@@ -52,13 +60,13 @@ def candidates(db, prefs):
 
 
 def ensure_requirements(db, job, use_llm=False):
+    """Return a job's requirements, extracting them again if missing or outdated."""
     reqs = list(db.scalars(select(Requirement).where(Requirement.job_id == job.id)))
-    if reqs and (
-        not use_llm
-        or all(r.model_version == settings().llm_model and r.prompt_version == PROMPT_VERSION for r in reqs)
-    ):
+    up_to_date = all(r.prompt_version == PROMPT_VERSION for r in reqs) and (
+        not use_llm or all(r.model_version == settings().llm_model for r in reqs)
+    )
+    if reqs and up_to_date:
         return reqs
-    # Upgrade deterministic preview extractions explicitly when --llm is requested.
     if reqs:
         db.execute(delete(Requirement).where(Requirement.job_id == job.id))
         reqs = []
@@ -75,9 +83,10 @@ def ensure_requirements(db, job, use_llm=False):
     return reqs
 
 
-def job_payload(db, job, cv, evidence, bm25_score=0):
+def job_payload(db, job, cv, evidence):
+    """A job plus, for each requirement, whether the CV supports it."""
     requirements = ensure_requirements(db, job)
-    vector, decisions = features(job, requirements, evidence, cv.text, bm25_score)
+    decisions = [match_requirement(r, evidence, cv.text) for r in requirements]
     score = round(100 * (0.85 * coverage(decisions, True) + 0.15 * coverage(decisions, False)))
     return {
         "id": job.id,
@@ -96,7 +105,6 @@ def job_payload(db, job, cv, evidence, bm25_score=0):
         "requirements": decisions,
         "first_seen": job.first_seen.isoformat(),
         "method": "Evidence coverage preview (untrained)",
-        "features": vector,
     }
 
 
@@ -191,12 +199,8 @@ async def upload_cv(
 
 @app.delete("/cv", status_code=204)
 def delete_cv(db: Session = Depends(get_db), user: User = Depends(current_user)):
-    cv_ids = list(db.scalars(select(CV.id).where(CV.user_id == user.id)))
-    db.execute(
-        delete(ExtractionCache).where(
-            ExtractionCache.scope.in_([user.id] + ["adjudication:" + c for c in cv_ids])
-        )
-    )
+    # Also remove any cached model output made from this user's CV.
+    db.execute(delete(ExtractionCache).where(ExtractionCache.scope == user.id))
     db.execute(delete(CV).where(CV.user_id == user.id))
     db.commit()
 
@@ -220,57 +224,18 @@ def matches(db: Session = Depends(get_db), user: User = Depends(current_user)):
     cv = latest_cv(db, user)
     if cv is None:
         raise HTTPException(409, "Add a CV before finding matches")
-    prefs = Preferences.model_validate(user.preferences)
-    jobs = candidates(db, prefs)
+    jobs = candidates(db, saved_preferences(user))
     evidence = list(db.scalars(select(Evidence).where(Evidence.cv_id == cv.id)))
-    lexical = BM25([j.title + "\n" + j.description for j in jobs]).score(cv.text)
-    result = [job_payload(db, j, cv, evidence, float(score)) for j, score in zip(jobs, lexical)]
-    from rolefit_ml.winner import ARTIFACT, score as learned_score
-
-    if ARTIFACT.exists():
-        import json
-        from rolefit_ml.retrieval import retrieve
-
-        artifact = json.loads(ARTIFACT.read_text())
-        method = artifact["method"]
-        if method in ("dense", "hybrid", "feature"):
-            from rolefit_ml.embeddings import embedder
-
-            model = embedder()
-            for ev in evidence:
-                if ev.embedding is None:
-                    ev.embedding = model.document(ev.quote)
-            for job in jobs:
-                if job.embedding is None:
-                    job.embedding = model.document(job.title + "\n" + job.description)
-                for req in ensure_requirements(db, job):
-                    if req.embedding is None:
-                        req.embedding = model.document(req.quote)
-            result = [job_payload(db, j, cv, evidence, float(s)) for j, s in zip(jobs, lexical)]
-        if result:
-            if method == "feature":
-                ranking = dict(
-                    zip([r["id"] for r in result], learned_score(artifact, [r["features"] for r in result]))
-                )
-            else:
-                ranking = dict(
-                    retrieve(
-                        method, jobs, cv.text, [e.embedding for e in evidence if e.embedding is not None]
-                    )
-                )
-            for row in result:
-                row["rank_score"] = float(ranking[row["id"]])
-                row["method"] = f"Ranked by evaluated {method}; displayed score is evidence coverage"
-            result.sort(key=lambda j: (-j["rank_score"], j["id"]))
-    else:
-        result.sort(key=lambda j: (-j["score"], -j["features"][0], j["id"]))
-    for row in result:
-        row.pop("features")
+    result = [job_payload(db, job, cv, evidence) for job in jobs]
+    # Rank by requirement coverage. When two jobs tie, the one whose text
+    # shares more words with the CV (BM25) comes first.
+    overlap = bm25_scores([j.title + "\n" + j.description for j in jobs], cv.text)
+    ranked = sorted(zip(result, overlap), key=lambda pair: (-pair[0]["score"], -pair[1], pair[0]["id"]))
     db.commit()
     return {
-        "jobs": result,
+        "jobs": [row for row, _ in ranked],
         "candidate_count": len(jobs),
-        "method": "Evidence coverage preview; evaluation pending",
+        "method": "Evidence coverage preview",
     }
 
 
@@ -285,7 +250,6 @@ def job_detail(job_id: str, db: Session = Depends(get_db), user: User = Depends(
     result = job_payload(db, job, cv, evidence)
     result["description"] = job.description
     result["is_open"] = job.is_open
-    result.pop("features")
     db.commit()
     return result
 
@@ -311,4 +275,4 @@ def decision(
 @app.get("/corpus/status")
 def corpus_status(db: Session = Depends(get_db), user: User = Depends(current_user)):
     run = db.scalar(select(CrawlRun).order_by(CrawlRun.started_at.desc()))
-    return run.report if run else {"eligible": 0, "corpus_gate_passed": False}
+    return run.report if run else {"eligible": 0}

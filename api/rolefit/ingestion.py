@@ -134,8 +134,8 @@ def reconcile(db, source: dict, records: list[dict], timestamp):
                 from sqlalchemy import delete
                 from .models import Requirement
 
+                # The posting changed, so its requirements are extracted again later.
                 db.execute(delete(Requirement).where(Requirement.job_id == job.id))
-                job.embedding = None
                 stats["updated"] += 1
             for key, value in row.items():
                 setattr(job, key, value)
@@ -209,8 +209,6 @@ async def crawl(db, seeds_path=None):
         families=dict(Counter(j.family for j in eligible)),
         total=len(jobs),
     )
-    report["corpus_gate_passed"] = len(eligible) >= 200
-    report["consultant_decision"] = "review yield and annotation accuracy before locking family"
     run.report, run.finished_at = report, now()
     db.commit()
     return report

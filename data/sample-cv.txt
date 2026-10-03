@@ -1,0 +1,20 @@
+Alex Morgan
+Machine Learning Engineer
+
+EXPERIENCE
+Machine Learning Engineer · Northstar Labs · Jan 2022 – Dec 2025
+Built Python services for document search and retrieval-augmented generation.
+Trained PyTorch models and deployed inference APIs with FastAPI and Docker.
+Designed SQL reporting pipelines over a PostgreSQL warehouse.
+Shipped production workloads on AWS with automated model monitoring.
+Collaborated with product teams to design experiments and evaluate model quality.
+
+EDUCATION
+MSc Computer Science · 2020 – 2022
+
+PROJECTS
+Built a semantic search tool using embeddings, vector databases and natural language processing.
+Created interactive dashboards using Python, pandas and data visualization.
+
+LANGUAGES
+English: fluent

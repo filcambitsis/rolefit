@@ -11,7 +11,6 @@ from rolefit import auth
 from rolefit.config import Settings
 from rolefit.extraction import StructuredCV, cached_call
 from rolefit.models import Budget
-from rolefit_ml.embeddings import Embedder
 
 
 def test_production_settings_never_accept_dev_auth():
@@ -96,10 +95,3 @@ def test_schema_rejects_extra_fields_and_bad_sections():
             {"items": [{"quote": "invented", "section": "instructions", "score": 99}]}
         )
 
-
-def test_embedding_length_guard_runs_before_inference():
-    embedder = object.__new__(Embedder)
-    embedder.tokenizer = SimpleNamespace(encode=lambda text, add_special_tokens: list(range(513)))
-    embedder.model = SimpleNamespace(encode=lambda *a, **k: pytest.fail("Overlong chunk reached the model"))
-    with pytest.raises(ValueError, match="refusing silent truncation"):
-        embedder.embed(["too long"])

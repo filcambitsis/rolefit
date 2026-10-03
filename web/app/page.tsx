@@ -30,6 +30,7 @@ import {
   X,
 } from "lucide-react";
 import {
+  cleanPreferences,
   defaults,
   demoJobs,
   Evidence,
@@ -133,7 +134,7 @@ export default function Home() {
         saved: string[];
         skipped: string[];
       }>("/me");
-      setPrefs({ ...defaults, ...profile.preferences });
+      setPrefs(cleanPreferences(profile.preferences));
       setSaved(profile.saved);
       setSkipped(profile.skipped);
       setEvidence(profile.evidence);
@@ -157,7 +158,7 @@ export default function Home() {
           localStorage.getItem("rolefit-demo-preferences") || "{}",
         );
         if (data.saved) setSaved(data.saved);
-        if (data.prefs) setPrefs({ ...defaults, ...data.prefs });
+        if (data.prefs) setPrefs(cleanPreferences(data.prefs));
       } catch {
         /* invalid local preferences are safely ignored */
       }
@@ -374,7 +375,7 @@ export default function Home() {
       : (prefs.workplace !== "any"
           ? Number(b.workplace === prefs.workplace) -
             Number(a.workplace === prefs.workplace)
-          : 0) || (b.rank_score ?? b.score) - (a.rank_score ?? a.score),
+          : 0) || b.score - a.score,
   );
   const strong = jobs.filter(
     (j) => j.required_coverage >= 0.8 && !skipped.includes(j.id),
@@ -1346,7 +1347,7 @@ export default function Home() {
             </span>
             <span>
               {demoMode
-                ? "Sample workspace · No evaluation results claimed"
+                ? "Sample workspace · Fictional companies and roles"
                 : "Your experience, your next chapter."}
             </span>
           </footer>

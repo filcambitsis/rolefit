@@ -1,5 +1,7 @@
 # Later
 
-Not part of the core experiment: cover letters, CV tailoring, behavioral personalization, application tracking, additional ATS providers, Dutch postings, salary parsing, employer enrichment, notifications, browser extensions, multi-CV comparisons, LightGBM, LLM ranking, technical-report PDF and demo video production.
+Ideas that are deliberately out of scope for the portfolio version: cover letters, CV tailoring,
+application tracking, more job sources, Dutch-language postings, salary parsing, notifications,
+browser extensions, comparing several CVs, and learned or LLM-based ranking.
 
-Do not add these before the labeled experiment and real backend deployment are complete. A null ranking result is publishable. User-requested frontend motion is included, with reduced-motion support.
+Core correctness comes first: truthful evidence, sensible scores, and a reliable main flow.

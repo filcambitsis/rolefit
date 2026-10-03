@@ -1,4 +1,4 @@
-.PHONY: setup check run-api run-web crawl extract evaluate label up
+.PHONY: setup check run-api run-web crawl extract up
 setup:
 	python3 -m venv .venv
 	.venv/bin/pip install -e '.[dev]'
@@ -6,7 +6,7 @@ setup:
 	mkdir -p work
 	.venv/bin/alembic upgrade head
 check:
-	.venv/bin/ruff check api ml scripts tests
+	.venv/bin/ruff check api scripts tests
 	.venv/bin/pytest -q
 	cd web && npm run typecheck && npm run lint && npm run build
 run-api:
@@ -17,9 +17,5 @@ crawl:
 	.venv/bin/rolefit crawl
 extract:
 	.venv/bin/rolefit extract
-evaluate:
-	.venv/bin/rolefit evaluate
-label:
-	.venv/bin/python scripts/label.py
 up:
 	docker compose up --build

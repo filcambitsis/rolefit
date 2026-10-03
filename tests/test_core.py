@@ -1,17 +1,14 @@
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
-import numpy as np
-import pytest
 from sqlalchemy import func, select
 
 from rolefit.extraction import extract_cv, extract_requirements, parse_file, verified_span
 from rolefit.ingestion import reconcile
 from rolefit.matching import match_requirement, years_of_experience
-from rolefit.models import Evidence, Job
+from rolefit.models import Evidence, Job, User
 from rolefit.normalization import employment, family
-from rolefit_ml.evaluation import metrics, run
-from rolefit_ml.retrieval import BM25, retrieve, rrf
+from rolefit.ranking import bm25_scores
 
 CV_TEXT = "Alex Test\nEXPERIENCE\nBuilt Python services and SQL reporting pipelines for a warehouse.\nEDUCATION\nMSc Computer Science\n"
 
@@ -84,7 +81,7 @@ def test_ingestion_idempotent_and_closure_grace(db, job):
     record = {
         c.name: getattr(job, c.name)
         for c in Job.__table__.columns
-        if c.name not in {"id", "first_seen", "last_seen", "is_open", "duplicate_of", "embedding"}
+        if c.name not in {"id", "first_seen", "last_seen", "is_open", "duplicate_of"}
     }
     first = reconcile(db, source, [record], timestamp)
     db.commit()
@@ -145,55 +142,17 @@ def test_pdf_two_columns_and_docx():
     assert "Python" in parse_file(stream.getvalue(), "cv.docx")
 
 
-def test_baseline_math_and_dense_gate():
-    assert BM25(["Python SQL", "Retail sales"]).score("Python")[0] > 0
-    assert BM25(["Python SQL", "Retail sales"]).score("Python")[1] == 0
-    assert rrf(["a", "b"], ["b", "a"])["a"] == rrf(["a", "b"], ["b", "a"])["b"]
-    with pytest.raises(ValueError, match="real bge"):
-        retrieve("dense", [SimpleNamespace(id="a", title="x", description="x", embedding=None)], "cv")
+def test_bm25_prefers_documents_sharing_words():
+    scores = bm25_scores(["Python SQL", "Retail sales"], "Python")
+    assert scores[0] > 0 and scores[1] == 0
+    assert bm25_scores([], "Python") == []
 
 
-def test_metrics_known_order():
-    result = metrics(["a", "b", "c"], {"a": 3, "b": 2, "c": 0}, 120)
-    assert result["ndcg10"] == pytest.approx(1.0)
-    assert result["precision5"] == 0.4
-    assert result["recall50"] == 1.0
-    assert metrics(["c", "b", "a"], {"a": 3, "b": 2, "c": 0}, 120)["ndcg10"] < 1
-
-
-def test_lopo_experiment_and_human_gates():
-    rng = np.random.default_rng(42)
-    personas = [{"id": str(i)} for i in range(8)]
-    pairs = []
-    labels = []
-    for p in personas:
-        for i in range(15):
-            grade = i % 4
-            features = rng.normal(size=12)
-            features[4] = grade / 3
-            pairs.append(
-                {
-                    "persona_id": p["id"],
-                    "job_id": str(i),
-                    "features": features.tolist(),
-                    "bm25": float(rng.random()),
-                    "dense": float(rng.random()),
-                    "hybrid": float(rng.random()),
-                }
-            )
-            labels.append({"persona_id": p["id"], "job_id": str(i), "grade": grade})
-    snapshot = {"personas": personas, "pairs": pairs}
-    with pytest.raises(ValueError, match="human-authored"):
-        run(snapshot, labels)
-    result = run(snapshot, labels, strict=False)
-    assert len(result["per_persona"]) == 8
-    assert "SYNTHETIC PIPELINE CHECK" in result["conclusion"]
-    assert set(result["results"]) == {
-        "bm25",
-        "dense",
-        "hybrid",
-        "feature",
-        "without_coverage",
-        "without_chunk_similarity",
-        "without_structural_fit",
-    }
+def test_ranking_and_retired_family_preferences(client, db, job):
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    # Preferences saved before a role family was removed must not break matching.
+    db.get(User, "alice").preferences = {"families": ["AI/Technology Consultant"]}
+    db.commit()
+    jobs = client.post("/matches").json()["jobs"]
+    assert [j["id"] for j in jobs] == [job.id]
+    assert family("AI & Technology Consultant") is None

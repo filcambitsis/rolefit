@@ -6,6 +6,6 @@ Every CV query and mutation is scoped to the Supabase UUID established by a veri
 
 LLM CV cache entries are scoped by user ID and content hash; no cross-user cache reuse. Deleting a CV removes its raw text, evidence and user-scoped extraction cache. Account-data deletion also removes saved/skipped decisions and preferences. Supabase account deletion is an independent identity-provider operation.
 
-The browser demo keeps pasted CV text only in memory. It stores only sample saved-job IDs and preferences in local storage. Browser refresh discards the CV text. Public fixtures must be explicitly anonymized and approved; the eight draft profiles are synthetic examples and do not count as study personas.
+The browser demo keeps pasted CV text only in memory. It stores only sample saved-job IDs and preferences in local storage. Browser refresh discards the CV text. Public fixtures must be fictional, or explicitly anonymized and approved. The bundled sample CV (`data/sample-cv.txt`) is fictional.
 
 Production operators must document database backup retention and purge periods before accepting real CVs. Do not log upload bodies, bearer tokens or provider keys. Configure a request-body limit at the reverse proxy as well as the application file-size guard. If model extraction is enabled, CV text is sent to the configured model provider; disclose that provider and its retention terms to users before launch.

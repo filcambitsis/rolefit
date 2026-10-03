@@ -1,0 +1,18 @@
+{
+  "id": "platform-engineer",
+  "name": "Casey Nguyen",
+  "origin": "synthetic-draft",
+  "status": "Replace with independently human-authored anonymized CV before evaluation",
+  "text": "Casey Nguyen\nPlatform Engineer\nEXPERIENCE\nPlatform Engineer \u00b7 Jan 2022 \u2013 Dec 2025\nDeployed Docker services with Kubernetes and AWS.\nBuilt CI/CD pipelines with Terraform and Python.\nEDUCATION\nBSc Information Systems\nLANGUAGES\nEnglish: fluent",
+  "preferences": {
+    "families": [],
+    "countries": [],
+    "employment": [
+      "full-time",
+      "part-time",
+      "internship"
+    ],
+    "workplace": "any",
+    "search": ""
+  }
+}

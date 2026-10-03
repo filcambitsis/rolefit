@@ -1,0 +1,18 @@
+{
+  "id": "non-native-profile",
+  "name": "Robin Patel",
+  "origin": "synthetic-draft",
+  "status": "Replace with independently human-authored anonymized CV before evaluation",
+  "text": "Robin Patel\nAnalytics Developer\nEXPERIENCE\nAnalytics Developer \u00b7 Jan 2022 \u2013 Dec 2025\nI make reporting pipeline from PostgreSQL and Python.\nOur sales team use my Power BI dashboard every morning.\nEDUCATION\nBSc Information Systems\nLANGUAGES\nEnglish: working proficiency",
+  "preferences": {
+    "families": [],
+    "countries": [],
+    "employment": [
+      "full-time",
+      "part-time",
+      "internship"
+    ],
+    "workplace": "any",
+    "search": ""
+  }
+}

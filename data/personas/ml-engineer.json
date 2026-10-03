@@ -1,0 +1,18 @@
+{
+  "id": "ml-engineer",
+  "name": "Alex Morgan",
+  "origin": "synthetic-draft",
+  "status": "Replace with independently human-authored anonymized CV before evaluation",
+  "text": "Alex Morgan\nMachine Learning Engineer\nEXPERIENCE\nMachine Learning Engineer \u00b7 Jan 2022 \u2013 Dec 2025\nBuilt Python services for retrieval-augmented generation.\nDeployed PyTorch models with FastAPI, Docker and AWS.\nEDUCATION\nBSc Information Systems\nLANGUAGES\nEnglish: fluent",
+  "preferences": {
+    "families": [],
+    "countries": [],
+    "employment": [
+      "full-time",
+      "part-time",
+      "internship"
+    ],
+    "workplace": "any",
+    "search": ""
+  }
+}

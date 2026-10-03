@@ -1,0 +1,18 @@
+{
+  "id": "data-analyst",
+  "name": "Jamie Chen",
+  "origin": "synthetic-draft",
+  "status": "Replace with independently human-authored anonymized CV before evaluation",
+  "text": "Jamie Chen\nData Analyst\nEXPERIENCE\nData Analyst \u00b7 Jan 2022 \u2013 Dec 2025\nBuilt reporting pipelines over a PostgreSQL warehouse.\nCreated Tableau dashboards with Python and pandas.\nEDUCATION\nBSc Information Systems\nLANGUAGES\nEnglish: fluent",
+  "preferences": {
+    "families": [],
+    "countries": [],
+    "employment": [
+      "full-time",
+      "part-time",
+      "internship"
+    ],
+    "workplace": "any",
+    "search": ""
+  }
+}

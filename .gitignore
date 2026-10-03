@@ -18,3 +18,24 @@ ml/models/
 data/private/
 data/cache/
 .DS_Store
+.next-dev/
+*.tsbuildinfo
+
+# Generated framework declarations and local hosting metadata
+web/next-env.d.ts
+web/.openai/
+
+# Local environments, caches, logs, and model artifacts
+venv/
+.mypy_cache/
+.coverage
+htmlcov/
+*.log
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.pt
+*.pth
+*.safetensors
+*.pem
+*.key

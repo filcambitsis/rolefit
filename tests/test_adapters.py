@@ -95,3 +95,55 @@ def test_failed_crawl_preserves_old_jobs(db, job, monkeypatch, tmp_path):
     report = asyncio.run(ingestion.crawl(db, seeds))
     assert report["boards"][0]["error"] == "Board unavailable"
     assert job.is_open
+
+
+def test_workable_locations_and_employment():
+    from rolefit.ingestion import normalize
+
+    payload = {
+        "jobs": [
+            {
+                "shortcode": "ABC",
+                "title": "Data Analyst",
+                "url": "https://example.com/job",
+                "description": "Required: Python and SQL. Build reporting dashboards for our team.",
+                "employment_type": "Full-time",
+                "workplace_type": "hybrid",
+                "locations": [
+                    {"city": "Athens", "country": "Greece"},
+                    {"city": "Amsterdam", "country": "Netherlands"},
+                ],
+            }
+        ]
+    }
+
+    payload["jobs"].append({**payload["jobs"][0], "locations": [{"city": "Berlin", "country": "Germany"}]})
+
+    async def run():
+        def respond(request):
+            assert request.url.params["details"] == "true"
+            return httpx.Response(200, json=payload)
+
+        async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as client:
+            source = {"provider": "workable", "board": "test", "company": "Test"}
+            records = await fetch_board(client, source)
+            assert len(records) == 1
+            job = normalize(source, records[0])
+            assert set(job["countries"]) == {"GR", "NL", "DE"}
+            assert job["employment"] == "full-time"
+            assert job["workplace"] == "hybrid"
+            assert job["description"].startswith("Required:")
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize("payload", [{"error": "unavailable"}, {"jobs": None}, []])
+def test_workable_invalid_feed_does_not_close_jobs(payload):
+    async def run():
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(lambda request: httpx.Response(200, json=payload))
+        ) as client:
+            with pytest.raises(ValueError):
+                await fetch_board(client, {"provider": "workable", "board": "test"})
+
+    asyncio.run(run())

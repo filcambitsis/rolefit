@@ -64,7 +64,7 @@ flowchart LR
     UI["Next.js / React frontend"] <--> API
     API --> Parse["Exact passages + skill vocabulary"]
     Parse --> DB[("SQLite locally / PostgreSQL schema")]
-    ATS["Greenhouse / Lever / Ashby"] --> Refresh["Crawl + normalise + extract"]
+    ATS["Greenhouse / Lever / Ashby / Workable"] --> Refresh["Crawl + normalise + extract"]
     Refresh --> DB
     DB --> Match["Requirement coverage + BM25"]
     Match --> API
@@ -134,3 +134,5 @@ Development authentication is restricted to loopback clients and localhost URLs/
 MIT licensed. Earlier research plans are preserved in [docs/archive](docs/archive/README.md); they are not claims of completed experiments.
 
 Choose **Work location** above the job list to filter by country (including the Netherlands and Greece), or select several countries in **Filters**. Results depend on the configured job feeds; an empty country has no matching imported listings. Remote roles keep their listed country restrictions.
+
+European feeds include Eye Security (Netherlands), Quality & Reliability, and YourHero / Douleutaras (Greece). Workable imports use its [documented public jobs endpoint](https://workable.readme.io/reference/jobs-1). Run `make refresh` to update listings; country availability still depends on open roles and your employment filters.

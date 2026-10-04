@@ -926,7 +926,7 @@ export default function Home() {
                             {view === "saved"
                               ? "Save a role to keep it within reach."
                               : evidence.length
-                                ? "Try more countries or a broader role family."
+                                ? "No imported jobs match your current filters. Check employment types (including full-time), role families, and search text, or try another country."
                                 : "Add your CV to turn your experience into job matches."}
                           </p>
                           <button

@@ -22,6 +22,46 @@ from .normalization import (
 
 async def fetch_board(client: httpx.AsyncClient, source: dict) -> list[dict]:
     board, provider = source["board"], source["provider"]
+    if provider == "workable":
+        # Workable's public feed includes complete descriptions with details=true.
+        response = await client.get(
+            f"https://www.workable.com/api/accounts/{board}", params={"details": "true"}
+        )
+        response.raise_for_status()
+        payload = response.json()
+        if not isinstance(payload, dict) or not isinstance(payload.get("jobs"), list):
+            raise ValueError("Invalid Workable payload; refusing closed detection")
+        records = {}
+        for job in payload["jobs"]:
+            locations = job.get("locations") or [job]
+            # Keep every published location, including country restrictions on remote roles.
+            location = "; ".join(
+                ", ".join(str(place.get(key) or "") for key in ("city", "country")).strip(", ")
+                for place in locations
+                if not place.get("hidden", False)
+            )
+            # Some feeds repeat a posting for each office. Keep one job with all locations.
+            if job["shortcode"] in records:
+                previous = records[job["shortcode"]]
+                previous["location"] = "; ".join(
+                    dict.fromkeys(
+                        [part for part in (previous["location"] + "; " + location).split("; ") if part]
+                    )
+                )
+                continue
+            records[job["shortcode"]] = dict(
+                external_id=job["shortcode"],
+                title=job["title"],
+                url=job["url"],
+                raw=job["description"],
+                location=location,
+                employment=job.get("employment_type", ""),
+                workplace=(
+                    job.get("workplace_type") or ("remote" if job.get("telecommuting") else "")
+                ).replace("_", "-"),
+                country="",
+            )
+        return list(records.values())
     if provider == "greenhouse":
         response = await client.get(
             f"https://boards-api.greenhouse.io/v1/boards/{board}/jobs", params={"content": "true"}

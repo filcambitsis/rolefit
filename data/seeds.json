@@ -108,5 +108,20 @@
     "provider": "ashby",
     "board": "cursor",
     "company": "Cursor"
+  },
+  {
+    "provider": "ashby",
+    "board": "eye-security",
+    "company": "Eye Security"
+  },
+  {
+    "provider": "workable",
+    "board": "qnr-1",
+    "company": "Quality & Reliability"
+  },
+  {
+    "provider": "workable",
+    "board": "yourhero-douleutaras",
+    "company": "YourHero / Douleutaras"
   }
 ]

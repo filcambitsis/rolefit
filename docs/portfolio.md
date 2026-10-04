@@ -5,7 +5,7 @@
 1. Run `make demo` and introduce the problem: a job list is more useful when you can inspect why each role appears.
 2. Show role discovery and the requirement-coverage explanation.
 3. Open a role. Point to an exact CV passage and a “Not verified in your CV” item.
-4. Save a role, visit Saved roles, then show role and employment preferences.
+4. Save a role, visit Saved jobs, then show role and employment preferences.
 5. Explain that the real backend parses PDF/DOCX/TXT and ingests public employer job boards. The displayed demo data is fictional.
 6. Finish with the tradeoff: transparent, inexpensive rules instead of an unvalidated learned ranking model. Mention the three-CV checks and limitations.
 

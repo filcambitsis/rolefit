@@ -259,11 +259,6 @@ main {
   gap: 9px;
   margin-bottom: 12px;
 }
-.blue-line {
-  width: 18px;
-  height: 2px;
-  background: var(--blue);
-}
 h1 {
   font-size: clamp(27px, 2.4vw, 37px);
   line-height: 1.25;
@@ -305,103 +300,6 @@ h1 {
 }
 .secondary:hover {
   background: #eef2ff;
-}
-.overview {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  margin-bottom: 32px;
-  min-height: 115px;
-  overflow: hidden;
-}
-.overview-main {
-  display: flex;
-  align-items: center;
-  gap: 17px;
-  padding: 23px 28px;
-  background: linear-gradient(95deg, #f1f4ff, #fafbff);
-  position: relative;
-}
-.overview-icon {
-  height: 48px;
-  width: 48px;
-  display: grid;
-  place-items: center;
-  background: #e3eaff;
-  color: var(--blue);
-  border-radius: 12px;
-  flex-shrink: 0;
-}
-.overview-main > div:nth-child(2) {
-  position: relative;
-  z-index: 1;
-  white-space: nowrap;
-}
-.overview span,
-.overview-stat > span {
-  font-size: 9px;
-  letter-spacing: 1.15px;
-  color: #8790a4;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.overview strong {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-family: "Manrope", sans-serif;
-  font-size: 29px;
-  font-weight: 750;
-  margin-top: 3px;
-  line-height: 1.3;
-  color: #283247;
-}
-.overview small {
-  font-family: var(--font);
-  font-size: 11px;
-  font-weight: 400;
-  color: #8690a1;
-}
-.mini-bars {
-  position: absolute;
-  right: 24px;
-  bottom: 0;
-  display: flex;
-  align-items: flex-end;
-  gap: 5px;
-  height: 57px;
-  opacity: 0.44;
-}
-.mini-bars i {
-  width: 7px;
-  background: linear-gradient(#becdff, #f0f4ff);
-  border-radius: 3px 3px 0 0;
-  transform-origin: bottom;
-  animation: grow 0.7s both;
-}
-.overview-stat {
-  padding: 27px 26px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.overview-stat:nth-child(2) {
-  border-right: 1px solid var(--line);
-}
-.stat-dot {
-  width: 5px;
-  height: 5px;
-  background: #52a584;
-  border-radius: 50%;
-  margin-right: 1px;
-}
-.overview-stat strong {
-  gap: 12px;
 }
 .workspace-grid {
   display: grid;
@@ -540,7 +438,6 @@ h1 {
   border: 1px solid #e4e8f0;
   border-radius: 12px;
   padding: 23px 23px 0;
-  animation: rise 0.5s both;
   transition:
     border-color 0.2s,
     box-shadow 0.2s,
@@ -548,8 +445,6 @@ h1 {
 }
 .job-card:hover {
   border-color: #bfcdf9;
-  box-shadow: 0 8px 24px #24367408;
-  transform: translateY(-2px);
 }
 .job-top {
   display: flex;
@@ -1534,28 +1429,9 @@ textarea::placeholder {
 .spin {
   animation: spin 1s linear infinite;
 }
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 @keyframes draw {
   from {
     stroke-dasharray: 0 188.5;
-  }
-}
-@keyframes grow {
-  from {
-    transform: scaleY(0.1);
-    opacity: 0;
-  }
-  to {
-    transform: scaleY(1);
   }
 }
 @keyframes fade {
@@ -1641,22 +1517,8 @@ textarea::placeholder {
 .sort-label select {
   font-size: 12px;
 }
-.overview span,
-.overview-stat > span {
-  font-size: 10px;
-}
-.overview small {
-  font-size: 12px;
-}
-.overview strong {
-  flex-wrap: wrap;
-  row-gap: 4px;
-}
 .job-footer .text-button {
   white-space: nowrap;
-}
-.overview-stat strong {
-  font-size: 28px;
 }
 .evidence-total {
   gap: 8px;
@@ -1696,9 +1558,6 @@ textarea::placeholder {
   .job-footer {
     padding: 16px 0;
   }
-  .overview {
-    min-height: 127px;
-  }
 }
 @media (max-width: 1200px) {
   .sidebar {
@@ -1718,24 +1577,6 @@ textarea::placeholder {
   .workspace-grid {
     grid-template-columns: minmax(0, 1fr) 235px;
     gap: 20px;
-  }
-  .overview-main {
-    padding: 20px;
-    gap: 12px;
-  }
-  .overview-stat {
-    padding: 22px 18px;
-  }
-  .overview small {
-    display: block;
-    width: 100%;
-    margin-top: 3px;
-  }
-  .overview strong {
-    font-size: 25px;
-  }
-  .mini-bars {
-    display: none;
   }
   .page-heading {
     align-items: flex-start;
@@ -1791,10 +1632,6 @@ textarea::placeholder {
   .context-column {
     gap: 16px;
   }
-  .overview-stat > span {
-    font-size: 9px;
-    letter-spacing: 0.8px;
-  }
   .job-title {
     font-size: 16px;
   }
@@ -1811,24 +1648,6 @@ textarea::placeholder {
   }
   .workspace-grid {
     grid-template-columns: 1fr;
-  }
-  .overview {
-    grid-template-columns: 1.3fr 1fr 1fr;
-  }
-  .overview-icon {
-    width: 35px;
-    height: 35px;
-    border-radius: 9px;
-  }
-  .overview-main {
-    gap: 10px;
-  }
-  .overview-main,
-  .overview-stat {
-    padding: 20px 15px;
-  }
-  .overview strong {
-    font-size: 25px;
   }
   .page-heading > .button {
     font-size: 12px;
@@ -1917,49 +1736,6 @@ textarea::placeholder {
   .eyebrow {
     font-size: 8px;
     letter-spacing: 1.4px;
-  }
-  .overview {
-    grid-template-columns: 1fr 1fr;
-    margin-bottom: 24px;
-  }
-  .overview-main {
-    grid-column: 1/-1;
-    padding: 18px 20px;
-    border-bottom: 1px solid #e7edfa;
-  }
-  .overview-main strong {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 10px;
-    font-size: 27px;
-  }
-  .overview-main small {
-    margin: 0;
-    width: auto;
-  }
-  .overview-main > div:nth-child(2) {
-    display: flex;
-    flex-direction: column;
-  }
-  .overview-icon {
-    width: 40px;
-    height: 40px;
-  }
-  .mini-bars {
-    display: flex;
-    width: 120px;
-  }
-  .overview-stat {
-    padding: 18px 20px;
-  }
-  .overview-stat strong {
-    font-size: 26px;
-  }
-  .overview-stat small {
-    font-size: 11px;
-  }
-  .overview-stat > span {
-    font-size: 9px;
   }
   .result-count {
     font-size: 11px;
@@ -2206,27 +1982,13 @@ textarea::placeholder {
 .job-meta {
   font-size: 14px;
 }
-.overview span,
-.overview-stat > span {
-  font-size: 11px;
-}
 .profile-link,
 .evidence-total,
 .privacy-note p {
   font-size: 13px;
 }
-.overview small {
-  color: #6a7892;
-}
-.mini-bars {
-  opacity: 0.55;
-}
 @media (max-width: 760px) {
   .eyebrow {
-    font-size: 10px;
-  }
-  .overview span,
-  .overview-stat > span {
     font-size: 10px;
   }
   .job-meta {
@@ -2264,9 +2026,6 @@ textarea::placeholder {
   }
   .fit-summary > div {
     min-width: 0;
-  }
-  .overview-stat > span {
-    letter-spacing: 0.04em;
   }
 }
 

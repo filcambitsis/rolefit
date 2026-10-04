@@ -13,7 +13,6 @@ import {
   ChevronRight,
   Compass,
   FileText,
-  Layers3,
   Loader2,
   LogOut,
   MapPin,
@@ -367,9 +366,6 @@ export default function Home() {
             Number(a.workplace === prefs.workplace)
           : 0) || (b.score ?? -1) - (a.score ?? -1),
   );
-  const strong = jobs.filter(
-    (j) => j.required_coverage >= 0.8 && !skipped.includes(j.id),
-  ).length;
 
   return (
     <div className="app-shell">
@@ -400,14 +396,14 @@ export default function Home() {
             className={view === "matches" ? "active" : ""}
             onClick={() => navigate("matches")}
           >
-            <Compass size={20} /> Discover roles{" "}
+            <Compass size={20} /> Find jobs{" "}
             <span className="nav-count">{jobs.length}</span>
           </button>
           <button
             className={view === "saved" ? "active" : ""}
             onClick={() => navigate("saved")}
           >
-            <Bookmark size={20} /> Saved roles{" "}
+            <Bookmark size={20} /> Saved jobs{" "}
             {saved.length > 0 && (
               <span className="nav-count">{saved.length}</span>
             )}
@@ -457,8 +453,8 @@ export default function Home() {
             <strong>
               {
                 {
-                  matches: "Discover roles",
-                  saved: "Saved roles",
+                  matches: "Find jobs",
+                  saved: "Saved jobs",
                   profile: "My CV",
                   preferences: "Preferences",
                 }[view]
@@ -477,7 +473,7 @@ export default function Home() {
           )}
           {needsAuth ? (
             <section className="auth-card">
-              <span className="eyebrow">YOUR NEXT CHAPTER</span>
+              <span className="eyebrow">SIGN IN</span>
               <h1>Welcome to RoleFit.</h1>
               <p>
                 Sign in to privately upload your CV and discover roles that fit
@@ -517,21 +513,15 @@ export default function Home() {
                 <>
                   <section className="page-heading">
                     <div>
-                      <div className="eyebrow">
-                        <span className="blue-line" />
-                        {view === "saved"
-                          ? "YOUR SHORTLIST"
-                          : "A LITTLE LESS SEARCH. A LOT MORE FIT."}
-                      </div>
                       <h1>
                         {view === "saved"
-                          ? "Worth a closer look."
-                          : "Your next move, clearer."}
+                          ? "Saved jobs"
+                          : "AI and data jobs in the Netherlands"}
                       </h1>
                       <p>
                         {view === "saved"
-                          ? "The roles you want to come back to."
-                          : "AI and data jobs in the Netherlands, matched to your CV."}
+                          ? "Jobs you’ve saved to review or apply to."
+                          : "Compare job requirements with your CV."}
                       </p>
                     </div>
                     <button
@@ -546,53 +536,6 @@ export default function Home() {
                       )}
                       Refresh matches
                     </button>
-                  </section>
-                  <section className="overview" aria-label="Workspace overview">
-                    <div className="overview-main">
-                      <div className="overview-icon">
-                        <Layers3 size={24} />
-                      </div>
-                      <div>
-                        <span>ROLES TO EXPLORE</span>
-                        <strong>
-                          {jobs.length}
-                          <small>in your workspace</small>
-                        </strong>
-                      </div>
-                      <div className="mini-bars" aria-hidden="true">
-                        {[24, 40, 31, 55, 43, 68, 57, 78, 70, 92, 85, 100].map(
-                          (h, i) => (
-                            <i
-                              key={i}
-                              style={{
-                                height: `${h}%`,
-                                animationDelay: `${i * 40}ms`,
-                              }}
-                            />
-                          ),
-                        )}
-                      </div>
-                    </div>
-                    <div className="overview-stat">
-                      <span>
-                        <span className="stat-dot" />
-                        HIGH REQUIREMENT COVERAGE
-                      </span>
-                      <strong>
-                        {strong.toString().padStart(2, "0")}
-                        <small>80%+ required coverage</small>
-                      </strong>
-                    </div>
-                    <div className="overview-stat">
-                      <span>
-                        <Bookmark size={13} />
-                        SAVED FOR LATER
-                      </span>
-                      <strong>
-                        {saved.length.toString().padStart(2, "0")}
-                        <small>Your next possibilities</small>
-                      </strong>
-                    </div>
                   </section>
                   <section className="workspace-grid">
                     <div className="results-column">
@@ -672,13 +615,7 @@ export default function Home() {
                       </div>
                       <div className="job-list">
                         {filtered.slice(0, visibleCount).map((job, i) => (
-                          <article
-                            className="job-card"
-                            key={job.id}
-                            style={{
-                              animationDelay: `${Math.min(i, 8) * 65}ms`,
-                            }}
-                          >
+                          <article className="job-card" key={job.id}>
                             <div className="job-top">
                               <CompanyMark company={job.company} index={i} />
                               <div className="job-heading">
@@ -805,10 +742,10 @@ export default function Home() {
                           <Compass size={38} />
                           <h2>
                             {view === "saved"
-                              ? "Your shortlist starts here."
+                              ? "No saved jobs yet."
                               : evidence.length
                                 ? "No roles match these filters."
-                                : "Let’s find your fit."}
+                                : "Upload a CV to get started."}
                           </h2>
                           <p>
                             {view === "saved"
@@ -830,7 +767,7 @@ export default function Home() {
                             }
                           >
                             {view === "saved"
-                              ? "Discover roles"
+                              ? "Find jobs"
                               : evidence.length
                                 ? "Edit preferences"
                                 : "Add your CV"}
@@ -917,14 +854,9 @@ export default function Home() {
                 <>
                   <section className="page-heading">
                     <div>
-                      <div className="eyebrow">
-                        <span className="blue-line" />
-                        THE EVIDENCE STARTS WITH YOU
-                      </div>
-                      <h1>Your experience. In focus.</h1>
+                      <h1>My CV</h1>
                       <p>
-                        Add a CV. We’ll connect your real experience to the
-                        right requirements.
+                        Upload your CV and review the text used for matching.
                       </p>
                     </div>
                     {evidence.length > 0 && (
@@ -1080,24 +1012,22 @@ export default function Home() {
                 <>
                   <section className="page-heading">
                     <div>
-                      <div className="eyebrow">
-                        <span className="blue-line" />
-                        MAKE ROOM FOR THE RIGHT ROLE
-                      </div>
-                      <h1>What comes next?</h1>
-                      <p>Set your essentials. Keep the possibilities open.</p>
+                      <h1>Job preferences</h1>
+                      <p>
+                        Choose the roles and employment types you want to see.
+                      </p>
                     </div>
                   </section>
                   <div className="preferences-layout">
                     <section className="panel preferences-panel">
                       <div className="preference-section">
-                        <div className="section-number">
-                          01 <span>YOUR DIRECTION</span>
-                        </div>
-                        <h2>Which roles feel like you?</h2>
-                        <p>Choose a few, or leave them all open.</p>
+                        <h2>Role types</h2>
+                        <p>
+                          Select role types, or leave all unselected to include
+                          every type.
+                        </p>
                         <div className="role-options">
-                          {families.map((f, i) => (
+                          {families.map((f) => (
                             <button
                               key={f}
                               className={
@@ -1106,7 +1036,6 @@ export default function Home() {
                               aria-pressed={prefs.families.includes(f)}
                               onClick={() => togglePreference("families", f)}
                             >
-                              <span>{["✳", "⌘", "◈", "▤", "↗"][i]}</span>
                               <strong>{f}</strong>
                               <span className="checkbox">
                                 {prefs.families.includes(f) && (
@@ -1118,10 +1047,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="preference-section">
-                        <div className="section-number">
-                          02 <span>YOUR WORKING STYLE</span>
-                        </div>
-                        <h2>Make it work for you.</h2>
+                        <h2>Employment and workplace</h2>
                         <label>Employment type</label>
                         <div className="choice-chips">
                           {["full-time", "part-time", "internship"].map(
@@ -1291,7 +1217,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="breakdown-title">
-                <h2>The proof behind your fit</h2>
+                <h2>Requirement details</h2>
                 <span>
                   {
                     selected.requirements.filter((r) => r.status === "met")

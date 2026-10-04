@@ -9,7 +9,7 @@ from rolefit.extraction import extract_cv, extract_requirements, parse_file, ver
 from rolefit.ingestion import reconcile
 from rolefit.matching import match_requirement
 from rolefit.models import Evidence, Job, User
-from rolefit.normalization import employment, family
+from rolefit.normalization import countries, employment, family
 from rolefit.ranking import bm25_scores
 
 CV_TEXT = "Alex Test\nEXPERIENCE\nBuilt Python services and SQL reporting pipelines for a warehouse.\nEDUCATION\nMSc Computer Science\n"
@@ -338,3 +338,26 @@ def test_unreadable_pdf_preserves_existing_cv(client):
         response = client.post("/cv", files={"file": ("scanned.pdf", document.tobytes())})
     assert response.status_code == 422
     assert client.get("/me").json()["cv"]["id"] == previous
+
+
+@pytest.mark.parametrize("location, explicit, expected", [
+    ("Athens, Greece", "", ["GR"]),
+    ("Thessaloniki", "", ["GR"]),
+    ("Αθήνα, Ελλάδα", "", ["GR"]),
+    ("Remote", "GR", ["GR"]),
+    ("Athens, Georgia", "US", ["US"]),
+    ("Amsterdam, Netherlands", "", ["NL"]),
+    ("Remote", "", []),
+])
+def test_work_countries(location, explicit, expected):
+    assert countries(location, explicit) == expected
+
+
+def test_greece_filter_and_multiple_countries(client, job, db):
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    job.countries = ["GR"]
+    job.location = "Athens, Greece"
+    db.commit()
+    for selection, count in [(["NL"], 0), (["GR"], 1), (["NL", "GR"], 1), ([], 1)]:
+        assert client.put("/preferences", json={"countries": selection}).status_code == 200
+        assert len(client.post("/matches").json()["jobs"]) == count

@@ -45,6 +45,7 @@ import { demoMode, request, supabase } from "../lib/api";
 type View = "matches" | "profile" | "preferences" | "saved";
 const countries = [
   ["NL", "Netherlands"],
+  ["GR", "Greece"],
   ["GB", "United Kingdom"],
   ["DE", "Germany"],
   ["FR", "France"],
@@ -54,6 +55,9 @@ const countries = [
   ["ES", "Spain"],
   ["CH", "Switzerland"],
   ["IN", "India"],
+  ["PL", "Poland"],
+  ["SG", "Singapore"],
+  ["AU", "Australia"],
 ];
 
 function Score({
@@ -725,6 +729,48 @@ export default function Home() {
                             </span>
                           )}
                         </button>
+                      </div>
+                      <div className="location-row">
+                        <label className="location-picker">
+                          <MapPin size={16} aria-hidden="true" />
+                          <span>Work location</span>
+                          <select
+                            aria-label="Work location"
+                            disabled={busy}
+                            value={
+                              prefs.countries.length > 1
+                                ? "multiple"
+                                : (prefs.countries[0] ?? "")
+                            }
+                            onChange={async (event) => {
+                              const next = {
+                                ...prefs,
+                                countries: event.target.value
+                                  ? [event.target.value]
+                                  : [],
+                              };
+                              setPrefs(next);
+                              setVisibleCount(12);
+                              await refresh(next);
+                            }}
+                          >
+                            <option value="">All countries</option>
+                            {prefs.countries.length > 1 && (
+                              <option value="multiple" disabled>
+                                Multiple countries ({prefs.countries.length})
+                              </option>
+                            )}
+                            {countries.map(([code, name]) => (
+                              <option key={code} value={code}>
+                                {name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <p>
+                          Choose several countries in Filters. Remote roles
+                          still have country restrictions.
+                        </p>
                       </div>
                       <div className="result-count">
                         <span>

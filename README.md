@@ -132,3 +132,5 @@ Development authentication is restricted to loopback clients and localhost URLs/
 - **Changed demo/connected mode:** stop and restart the frontend with the appropriate Makefile command.
 
 MIT licensed. Earlier research plans are preserved in [docs/archive](docs/archive/README.md); they are not claims of completed experiments.
+
+Choose **Work location** above the job list to filter by country (including the Netherlands and Greece), or select several countries in **Filters**. Results depend on the configured job feeds; an empty country has no matching imported listings. Remote roles keep their listed country restrictions.

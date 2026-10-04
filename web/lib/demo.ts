@@ -186,6 +186,16 @@ const templates = [
     ["Python", "PyTorch", "Computer vision"],
     ["Docker", "AWS"],
   ],
+  [
+    "Aegean",
+    "Data Analyst",
+    "Athens, Greece",
+    "GR",
+    "Data Analyst",
+    "hybrid",
+    ["SQL", "Python", "Data visualization"],
+    ["Tableau", "Statistics"],
+  ],
 ] as const;
 export function demoJobs(evidence: Evidence[]): Job[] {
   return templates

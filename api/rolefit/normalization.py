@@ -69,6 +69,7 @@ def workplace(value: str, location: str, text: str) -> tuple[str, str]:
 
 
 COUNTRIES = {
+    "GR": ["greece", "ελλάδα", "athens", "αθήνα", "thessaloniki", "θεσσαλονίκη"],
     "NL": ["netherlands", "amsterdam", "rotterdam", "utrecht", "eindhoven"],
     "GB": ["united kingdom", "london", "cambridge", "manchester", "edinburgh"],
     "DE": ["germany", "berlin", "munich", "hamburg", "münchen"],
@@ -97,6 +98,9 @@ COUNTRIES = {
 
 
 def countries(location: str, explicit: str = "") -> list[str]:
+    # Structured country codes take precedence over ambiguous city names.
+    if explicit.strip().upper() in COUNTRIES:
+        return [explicit.strip().upper()]
     values = []
     for code, aliases in COUNTRIES.items():
         if explicit.upper() == code or any(

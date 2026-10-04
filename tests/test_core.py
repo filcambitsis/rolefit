@@ -55,7 +55,7 @@ def test_cv_flow_and_user_isolation(client, db, job):
 def test_hard_filters_unknown_country_and_closed(client, job, db):
     client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
     client.put("/preferences", json={"countries": ["US"]})
-    assert client.post("/matches").json()["jobs"] == []
+    assert len(client.post("/matches").json()["jobs"]) == 1
     client.put("/preferences", json={"countries": ["NL"]})
     assert len(client.post("/matches").json()["jobs"]) == 1
     job.countries = []
@@ -340,24 +340,50 @@ def test_unreadable_pdf_preserves_existing_cv(client):
     assert client.get("/me").json()["cv"]["id"] == previous
 
 
-@pytest.mark.parametrize("location, explicit, expected", [
-    ("Athens, Greece", "", ["GR"]),
-    ("Thessaloniki", "", ["GR"]),
-    ("Αθήνα, Ελλάδα", "", ["GR"]),
-    ("Remote", "GR", ["GR"]),
-    ("Athens, Georgia", "US", ["US"]),
-    ("Amsterdam, Netherlands", "", ["NL"]),
-    ("Remote", "", []),
-])
+@pytest.mark.parametrize(
+    "location, explicit, expected",
+    [
+        ("Athens, Greece", "", ["GR"]),
+        ("Thessaloniki", "", ["GR"]),
+        ("Αθήνα, Ελλάδα", "", ["GR"]),
+        ("Remote", "GR", ["GR"]),
+        ("Athens, Georgia", "US", ["US"]),
+        ("Amsterdam, Netherlands", "", ["NL"]),
+        ("Remote", "", []),
+    ],
+)
 def test_work_countries(location, explicit, expected):
     assert countries(location, explicit) == expected
 
 
-def test_greece_filter_and_multiple_countries(client, job, db):
+@pytest.mark.parametrize("country", ["US", "GR", "DE", None])
+def test_netherlands_scope_cannot_be_overridden(client, job, db, country):
     client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
-    job.countries = ["GR"]
-    job.location = "Athens, Greece"
+    client.put(f"/jobs/{job.id}/decision", json={"state": "saved"})
+    job.countries = [country] if country else []
+    job.workplace = "remote"
     db.commit()
-    for selection, count in [(["NL"], 0), (["GR"], 1), (["NL", "GR"], 1), ([], 1)]:
+    for selection in [["NL"], ["US"], []]:
         assert client.put("/preferences", json={"countries": selection}).status_code == 200
-        assert len(client.post("/matches").json()["jobs"]) == count
+        assert client.post("/matches").json()["jobs"] == []
+    assert client.get(f"/jobs/{job.id}").status_code == 404
+    assert client.put(f"/jobs/{job.id}/decision", json={"state": "saved"}).status_code == 404
+    assert client.get("/me").json()["saved"] == []
+    assert "countries" not in client.get("/me").json()["preferences"]
+
+
+def test_multilocation_job_available_in_netherlands(client, job, db):
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    job.countries = ["NL", "DE"]
+    db.commit()
+    assert len(client.post("/matches").json()["jobs"]) == 1
+
+
+@pytest.mark.parametrize("heading", ["Must-Have", "What You Will Bring", "What you will need:"])
+def test_dutch_feed_requirement_headings(heading):
+    rows = extract_requirements(
+        f"{heading}\nExperience with Python.\nNice-to-Have\nExperience with Docker.\nWhat we offer\nTraining in SQL and Kubernetes."
+    )
+    assert any(row["skill"] == "Python" and row["required"] for row in rows)
+    assert any(row["skill"] == "Docker" and not row["required"] for row in rows)
+    assert not any(row["skill"] in {"SQL", "Kubernetes"} for row in rows)

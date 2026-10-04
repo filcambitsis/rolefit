@@ -51,3 +51,7 @@ Default local startup uses frontend 3002 and API 8000 with matching CORS setting
 ## Release boundary
 
 Ready for a local portfolio demonstration after the documented checks pass. Public hosting, production authentication, backup-retention operations and a remote CI result are separate from these local checks.
+
+## Netherlands-only update (5 October 2026)
+
+The API enforces Netherlands availability for matches, job details and saving. Legacy country preferences are ignored, and old foreign bookmarks are hidden. Tests cover foreign/unknown remote locations and multi-location Dutch jobs. The source list now contains Eye Security, DataSnipper, IMC and TomTom (Lever EU). Refresh yielded 11 eligible listings, all with extracted requirements after adding missing section-heading variants. Desktop (1440px) and mobile (390px) layouts, evidence, simplified preferences, saving and shortlist navigation were checked; screenshots were refreshed.

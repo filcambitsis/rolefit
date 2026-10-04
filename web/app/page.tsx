@@ -9,20 +9,16 @@ import {
   Bookmark,
   BriefcaseBusiness,
   Check,
-  CheckCheck,
   ChevronDown,
   ChevronRight,
-  CircleHelp,
   Compass,
   FileText,
-  Globe2,
   Layers3,
   Loader2,
   LogOut,
   MapPin,
   Menu,
   Search,
-  Settings2,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -43,22 +39,6 @@ import {
 import { demoMode, request, supabase } from "../lib/api";
 
 type View = "matches" | "profile" | "preferences" | "saved";
-const countries = [
-  ["NL", "Netherlands"],
-  ["GR", "Greece"],
-  ["GB", "United Kingdom"],
-  ["DE", "Germany"],
-  ["FR", "France"],
-  ["IE", "Ireland"],
-  ["US", "United States"],
-  ["CA", "Canada"],
-  ["ES", "Spain"],
-  ["CH", "Switzerland"],
-  ["IN", "India"],
-  ["PL", "Poland"],
-  ["SG", "Singapore"],
-  ["AU", "Australia"],
-];
 
 function Score({
   score,
@@ -358,10 +338,7 @@ export default function Home() {
       setError((e as Error).message);
     }
   }
-  function togglePreference(
-    key: "families" | "countries" | "employment",
-    value: string,
-  ) {
+  function togglePreference(key: "families" | "employment", value: string) {
     setPrefs({
       ...prefs,
       [key]: prefs[key].includes(value)
@@ -374,8 +351,7 @@ export default function Home() {
       !skipped.includes(j.id) &&
       (view !== "saved" || saved.includes(j.id)) &&
       (!prefs.families.length || prefs.families.includes(j.family)) &&
-      (!prefs.countries.length ||
-        j.countries.some((c) => prefs.countries.includes(c))) &&
+      j.countries.includes("NL") &&
       prefs.employment.includes(j.employment) &&
       (!prefs.search ||
         `${j.title} ${j.company}`
@@ -451,45 +427,20 @@ export default function Home() {
             <SlidersHorizontal size={20} /> Preferences
           </button>
         </nav>
-        <div className="sidebar-bottom">
-          <div className="sidebar-note">
-            <span className="note-icon">
-              <ShieldCheck size={20} />
-            </span>
-            <h3>Proof behind the fit.</h3>
-            <p>Every matched requirement points to evidence in your CV.</p>
-            <button onClick={() => navigate("profile")}>
-              See your evidence <ArrowUpRight size={15} />
-            </button>
-          </div>
-          <div className="user-card">
-            <div className="avatar">{demoMode ? "AM" : "RF"}</div>
-            <div>
-              <strong>
-                {demoMode ? "Sample workspace" : "Your workspace"}
-              </strong>
-              <span>
-                {demoMode ? "Explore RoleFit" : "Evidence-grounded matching"}
-              </span>
-            </div>
-            {supabase && !needsAuth ? (
-              <button
-                aria-label="Sign out"
-                onClick={async () => {
-                  await supabase!.auth.signOut();
-                  setNeedsAuth(true);
-                  setJobs([]);
-                  setEvidence([]);
-                  setSaved([]);
-                }}
-              >
-                <LogOut size={17} />
-              </button>
-            ) : (
-              <Settings2 size={17} />
-            )}
-          </div>
-        </div>
+        {supabase && !needsAuth && (
+          <button
+            className="text-button"
+            onClick={async () => {
+              await supabase!.auth.signOut();
+              setNeedsAuth(true);
+              setJobs([]);
+              setEvidence([]);
+              setSaved([]);
+            }}
+          >
+            <LogOut size={17} /> Sign out
+          </button>
+        )}
       </aside>
       <div className="main-shell">
         <header className="topbar">
@@ -513,24 +464,6 @@ export default function Home() {
                 }[view]
               }
             </strong>
-          </div>
-          <div className="topbar-right">
-            <span className="mode-pill">
-              <span />
-              {demoMode ? "Interactive demo" : "Connected workspace"}
-            </span>
-            <button
-              className="icon-button help-button"
-              aria-label="How matching works"
-              onClick={() =>
-                setNotice(
-                  "Requirement coverage measures support in your CV for extracted job requirements. Required items carry 85% and preferred items 15%; if only one group exists it carries 100%. No extracted requirements means no score. This is not a hiring probability.",
-                )
-              }
-            >
-              <CircleHelp size={19} />
-            </button>
-            <div className="top-avatar">{demoMode ? "AM" : "RF"}</div>
           </div>
         </header>
         <main id="main">
@@ -598,7 +531,7 @@ export default function Home() {
                       <p>
                         {view === "saved"
                           ? "The roles you want to come back to."
-                          : "AI and data roles, matched to what you’ve actually done."}
+                          : "AI and data jobs in the Netherlands, matched to your CV."}
                       </p>
                     </div>
                     <button
@@ -722,55 +655,10 @@ export default function Home() {
                         >
                           <SlidersHorizontal size={17} />
                           Filters
-                          {prefs.families.length + prefs.countries.length >
-                            0 && (
-                            <span>
-                              {prefs.families.length + prefs.countries.length}
-                            </span>
+                          {prefs.families.length > 0 && (
+                            <span>{prefs.families.length}</span>
                           )}
                         </button>
-                      </div>
-                      <div className="location-row">
-                        <label className="location-picker">
-                          <MapPin size={16} aria-hidden="true" />
-                          <span>Work location</span>
-                          <select
-                            aria-label="Work location"
-                            disabled={busy}
-                            value={
-                              prefs.countries.length > 1
-                                ? "multiple"
-                                : (prefs.countries[0] ?? "")
-                            }
-                            onChange={async (event) => {
-                              const next = {
-                                ...prefs,
-                                countries: event.target.value
-                                  ? [event.target.value]
-                                  : [],
-                              };
-                              setPrefs(next);
-                              setVisibleCount(12);
-                              await refresh(next);
-                            }}
-                          >
-                            <option value="">All countries</option>
-                            {prefs.countries.length > 1 && (
-                              <option value="multiple" disabled>
-                                Multiple countries ({prefs.countries.length})
-                              </option>
-                            )}
-                            {countries.map(([code, name]) => (
-                              <option key={code} value={code}>
-                                {name}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        <p>
-                          Choose several countries in Filters. Remote roles
-                          still have country restrictions.
-                        </p>
                       </div>
                       <div className="result-count">
                         <span>
@@ -926,7 +814,7 @@ export default function Home() {
                             {view === "saved"
                               ? "Save a role to keep it within reach."
                               : evidence.length
-                                ? "No imported jobs match your current filters. Check employment types (including full-time), role families, and search text, or try another country."
+                                ? "No Dutch jobs match these filters. Try including full-time roles, a different role family, or clearing your search."
                                 : "Add your CV to turn your experience into job matches."}
                           </p>
                           <button
@@ -1020,46 +908,6 @@ export default function Home() {
                         >
                           Manage your CV <ArrowRight size={15} />
                         </button>
-                      </div>
-                      <div className="how-card">
-                        <span className="how-icon">
-                          <Sparkles size={21} />
-                        </span>
-                        <h2>
-                          A match you can
-                          <br />
-                          actually explain.
-                        </h2>
-                        <p>
-                          No mystery score. Open any role to see what fits,
-                          what’s not verified, and the exact lines in your CV
-                          behind it.
-                        </p>
-                        <div className="how-example">
-                          <div>
-                            <CheckCheck size={15} />
-                            <span>Requirement matched</span>
-                          </div>
-                          <p>“Built Python services for document search…”</p>
-                          <span>
-                            <FileText size={12} /> A verified quote from your CV
-                          </span>
-                        </div>
-                        <span className="method-note">
-                          Scores show requirement coverage, not hiring
-                          probability.
-                        </span>
-                      </div>
-                      <div className="source-note">
-                        <span>SOURCED AT THE SOURCE</span>
-                        <div>
-                          Greenhouse <b>·</b> Lever <b>·</b> Ashby
-                        </div>
-                        <p>
-                          {demoMode
-                            ? "This demo uses illustrative companies and roles. No live vacancies or research results are claimed."
-                            : "Current postings collected directly from employer job boards."}
-                        </p>
                       </div>
                     </aside>
                   </section>
@@ -1271,38 +1119,7 @@ export default function Home() {
                       </div>
                       <div className="preference-section">
                         <div className="section-number">
-                          02 <span>YOUR PLACE</span>
-                        </div>
-                        <h2>Where are you looking?</h2>
-                        <p>
-                          No selection means all listed countries. Remote roles
-                          still have country restrictions.
-                        </p>
-                        <div className="choice-chips">
-                          {countries.map(([code, name]) => (
-                            <button
-                              key={code}
-                              className={
-                                prefs.countries.includes(code) ? "chosen" : ""
-                              }
-                              aria-pressed={prefs.countries.includes(code)}
-                              onClick={() =>
-                                togglePreference("countries", code)
-                              }
-                            >
-                              {prefs.countries.includes(code) ? (
-                                <Check size={14} />
-                              ) : (
-                                <Globe2 size={14} />
-                              )}{" "}
-                              {name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="preference-section">
-                        <div className="section-number">
-                          03 <span>YOUR WORKING STYLE</span>
+                          02 <span>YOUR WORKING STYLE</span>
                         </div>
                         <h2>Make it work for you.</h2>
                         <label>Employment type</label>
@@ -1386,42 +1203,16 @@ export default function Home() {
                         </button>
                       )}
                     </section>
-                    <aside className="preferences-aside">
-                      <span className="orbit-icon">
-                        <Compass size={42} />
-                      </span>
-                      <h2>
-                        Think direction,
-                        <br />
-                        not destination.
-                      </h2>
-                      <p>
-                        A broader search can uncover a role you hadn’t
-                        considered. You can adjust these preferences anytime.
-                      </p>
-                      <div>
-                        <ShieldCheck size={18} />
-                        <span>
-                          Your skills come from your CV. Your preferences come
-                          from you.
-                        </span>
-                      </div>
-                    </aside>
                   </div>
                 </>
               )}
             </>
           )}
-          <footer className="page-footer">
-            <span>
-              rolefit<span>.</span> <small>Built on evidence.</small>
-            </span>
-            <span>
-              {demoMode
-                ? "Sample workspace · Fictional companies and roles"
-                : "Your experience, your next chapter."}
-            </span>
-          </footer>
+          {demoMode && (
+            <p className="demo-disclaimer">
+              Demo · Fictional CV, companies and roles.
+            </p>
+          )}
         </main>
       </div>
       {notice && (

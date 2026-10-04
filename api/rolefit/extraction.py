@@ -16,7 +16,7 @@ from .skills import mentions, normalize_skill
 
 # Bump this when extraction rules or the skills vocabulary change:
 # stored requirements with an older version are extracted again.
-PROMPT_VERSION = "evidence-v6"
+PROMPT_VERSION = "evidence-v7"
 MAX_TEXT = 150_000
 
 
@@ -231,7 +231,7 @@ def extract_requirements(raw, db=None, use_llm=False):
         candidates, preferred, in_requirements = [], False, False
         for line in raw.splitlines():
             line = line.strip()
-            heading = line.lower().strip(": ")
+            heading = re.sub(r"[-–]", " ", line.lower()).strip(": ")
             # Section boundaries prevent company blurbs and benefits becoming requirements.
             if len(line) < 160 and re.search(
                 r"^(nice to haves?|preferred qualifications|preferred requirements|bonus|desirable|"
@@ -246,15 +246,15 @@ def extract_requirements(raw, db=None, use_llm=False):
                 r"it.s important to us|essential skills|minimum qualifications|"
                 r"what you.ll bring|what we.re looking for|you may be a fit if|you should have|you.ll need|"
                 r"we.d love|we.re looking for|you might be a fit|skills and experience|what you.ll need|"
-                r"what you need|who you are|about you|what we look for|skills you|you might thrive|you may be a good fit)",
+                r"what you will (?:need|bring)|what you need|who you are|about you|what we look for|skills you|you might thrive|you may be a good fit)",
                 heading,
             ):
                 preferred, in_requirements = False, True
                 continue
             if re.search(
                 r"^(about us|about the |who we are|what you.ll do|you will:?$|responsibilities|"
-                r"benefits|compensation|applying|please note|we offer|equal opportunity|about |"
-                r"we hire|full.time employees|how and where we work|a note on ai|by clicking|#li-|notice$|working location|our research interviews)",
+                r"what we offer|what we expect|recruitment steps|meet your team|after you apply|benefits|compensation|applying|please note|we offer|equal opportunity|about |"
+                r"we hire|full.time employees|how and where we work|a note on ai|by clicking|#li[ -]|notice$|working location|our research interviews)",
                 heading,
             ):
                 in_requirements = False

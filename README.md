@@ -1,8 +1,8 @@
 # RoleFit
 
-A local portfolio app for exploring AI and data jobs with evidence from your CV.
+A local portfolio app for exploring AI and data jobs in the Netherlands with evidence from your CV.
 
-Upload a CV, set role and country preferences, and explore public vacancies ranked by **requirement coverage**. Open a role to see exact CV passages behind skill matches, requirements that need manual review, and the original application link.
+Upload a CV, set role and employment preferences, and explore public vacancies ranked by **requirement coverage**. Open a role to see exact CV passages behind skill matches, requirements that need manual review, and the original application link.
 
 ![RoleFit desktop workspace](docs/images/desktop.png)
 
@@ -42,7 +42,7 @@ make demo
 
 Open the same frontend URL. Stop any previous frontend with Ctrl+C first. The demo contains fictional companies and a fictional CV; PDF/DOCX parsing requires the backend. Demo preferences and saved sample IDs persist in the browser, but pasted CV text stays in memory.
 
-![RoleFit overview and evidence walkthrough](docs/images/demo.gif)
+![RoleFit requirement evidence](docs/images/evidence.png)
 
 ## How matching works
 
@@ -50,7 +50,7 @@ Open the same frontend URL. Stop any previous frontend with Ctrl+C first. The de
 2. **Extract requirements.** Recognise qualification sections and map explicit skills through a small reviewed vocabulary. Preserve other requirements as unverified instead of silently discarding them.
 3. **Match mentions.** Link recognised skills to exact CV passages. A mention is not proof of proficiency, production experience or every condition in a job sentence.
 4. **Calculate coverage.** Required items carry 85% and preferred items 15%. If only one group is present, it carries 100%. No extracted requirements means **no score**, not 0%.
-5. **Order results.** Coverage first, BM25 text overlap for ties. Country, role family and employment type are filters; workplace preference can reorder the displayed results.
+5. **Order results.** Coverage first, BM25 text overlap for ties. Only jobs explicitly available in the Netherlands are shown; role family and employment type are filters; workplace preference can reorder the displayed results.
 
 Degree, relevant experience and other complex requirements remain **“Not verified in your CV”** for manual review. This does not mean the candidate lacks them. Senior roles and limited extractions have visible reminders to inspect the original posting.
 
@@ -64,7 +64,7 @@ flowchart LR
     UI["Next.js / React frontend"] <--> API
     API --> Parse["Exact passages + skill vocabulary"]
     Parse --> DB[("SQLite locally / PostgreSQL schema")]
-    ATS["Greenhouse / Lever / Ashby / Workable"] --> Refresh["Crawl + normalise + extract"]
+    ATS["Greenhouse / Lever / Ashby"] --> Refresh["Crawl + normalise + extract"]
     Refresh --> DB
     DB --> Match["Requirement coverage + BM25"]
     Match --> API
@@ -127,12 +127,12 @@ Development authentication is restricted to loopback clients and localhost URLs/
 - **Port busy:** stop the previous RoleFit terminal with Ctrl+C; do not stop unrelated projects. Default frontend port is 3002 to avoid common port-3000 conflicts.
 - **API shows “Not Found”:** open port 3002 for the app; port 8000 is the API.
 - **Could not reach RoleFit:** start `make run-api` and check `http://127.0.0.1:8000/health`.
-- **No jobs:** run `make refresh` and broaden country/role filters.
+- **No jobs:** run `make refresh` and check role and employment filters (include full-time).
 - **File-watcher errors on macOS:** the Makefile enables polling for the frontend.
 - **Changed demo/connected mode:** stop and restart the frontend with the appropriate Makefile command.
 
 MIT licensed. Earlier research plans are preserved in [docs/archive](docs/archive/README.md); they are not claims of completed experiments.
 
-Choose **Work location** above the job list to filter by country (including the Netherlands and Greece), or select several countries in **Filters**. Results depend on the configured job feeds; an empty country has no matching imported listings. Remote roles keep their listed country restrictions.
+## Netherlands-only scope
 
-European feeds include Eye Security (Netherlands), Quality & Reliability, and YourHero / Douleutaras (Greece). Workable imports use its [documented public jobs endpoint](https://workable.readme.io/reference/jobs-1). Run `make refresh` to update listings; country availability still depends on open roles and your employment filters.
+RoleFit collects English-language AI and data listings from Eye Security, DataSnipper, IMC and TomTom. Remote roles must explicitly list the Netherlands as an allowed location. There are no country or city controls, LinkedIn/Indeed integrations, or pasted-job inputs. Unknown employment types remain excluded rather than guessed. Availability depends on current employer postings.

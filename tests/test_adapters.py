@@ -97,53 +97,33 @@ def test_failed_crawl_preserves_old_jobs(db, job, monkeypatch, tmp_path):
     assert job.is_open
 
 
-def test_workable_locations_and_employment():
-    from rolefit.ingestion import normalize
-
-    payload = {
-        "jobs": [
-            {
-                "shortcode": "ABC",
-                "title": "Data Analyst",
-                "url": "https://example.com/job",
-                "description": "Required: Python and SQL. Build reporting dashboards for our team.",
-                "employment_type": "Full-time",
-                "workplace_type": "hybrid",
-                "locations": [
-                    {"city": "Athens", "country": "Greece"},
-                    {"city": "Amsterdam", "country": "Netherlands"},
-                ],
-            }
-        ]
-    }
-
-    payload["jobs"].append({**payload["jobs"][0], "locations": [{"city": "Berlin", "country": "Germany"}]})
-
+def test_lever_european_board():
     async def run():
         def respond(request):
-            assert request.url.params["details"] == "true"
-            return httpx.Response(200, json=payload)
+            assert request.url.host == "api.eu.lever.co"
+            return httpx.Response(200, json=[])
 
         async with httpx.AsyncClient(transport=httpx.MockTransport(respond)) as client:
-            source = {"provider": "workable", "board": "test", "company": "Test"}
-            records = await fetch_board(client, source)
-            assert len(records) == 1
-            job = normalize(source, records[0])
-            assert set(job["countries"]) == {"GR", "NL", "DE"}
-            assert job["employment"] == "full-time"
-            assert job["workplace"] == "hybrid"
-            assert job["description"].startswith("Required:")
+            assert await fetch_board(client, {"provider": "lever", "board": "tomtom", "region": "eu"}) == []
 
     asyncio.run(run())
 
 
-@pytest.mark.parametrize("payload", [{"error": "unavailable"}, {"jobs": None}, []])
-def test_workable_invalid_feed_does_not_close_jobs(payload):
-    async def run():
-        async with httpx.AsyncClient(
-            transport=httpx.MockTransport(lambda request: httpx.Response(200, json=payload))
-        ) as client:
-            with pytest.raises(ValueError):
-                await fetch_board(client, {"provider": "workable", "board": "test"})
+def test_foreign_duplicate_does_not_hide_dutch_job(db, job, monkeypatch, tmp_path):
+    import json
+    from datetime import timedelta
+    from rolefit import ingestion
+    from rolefit.models import Job
 
-    asyncio.run(run())
+    foreign = Job(
+        **{column.name: getattr(job, column.name) for column in Job.__table__.columns if column.name != "id"}
+    )
+    foreign.external_id = "foreign"
+    foreign.countries = ["US"]
+    foreign.first_seen = job.first_seen - timedelta(days=1)
+    db.add(foreign)
+    db.commit()
+    seeds = tmp_path / "empty-sources.json"
+    seeds.write_text(json.dumps([]))
+    asyncio.run(ingestion.crawl(db, seeds))
+    assert job.duplicate_of is None

@@ -1,12 +1,11 @@
 from typing import Literal
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from .normalization import FAMILIES
 
 
 class Preferences(BaseModel):
     model_config = ConfigDict(extra="forbid")
     families: list[str] = Field(default_factory=list, max_length=5)
-    countries: list[str] = Field(default_factory=list, max_length=100)
     employment: list[Literal["full-time", "part-time", "internship"]] = Field(
         default_factory=lambda: ["full-time", "part-time", "internship"], min_length=1, max_length=3
     )
@@ -20,12 +19,13 @@ class Preferences(BaseModel):
             raise ValueError("Unknown role family")
         return list(dict.fromkeys(values))
 
-    @field_validator("countries")
+    @model_validator(mode="before")
     @classmethod
-    def valid_countries(cls, values):
-        if any(len(v) != 2 or not v.isalpha() or v != v.upper() for v in values):
-            raise ValueError("Use uppercase ISO two-letter country codes")
-        return list(dict.fromkeys(values))
+    def drop_legacy_country_preference(cls, values):
+        # Old browser sessions can still send countries. The app now always searches NL.
+        if isinstance(values, dict):
+            return {key: value for key, value in values.items() if key != "countries"}
+        return values
 
 
 class DecisionInput(BaseModel):

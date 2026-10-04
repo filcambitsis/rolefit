@@ -81,10 +81,8 @@ def candidates(db, prefs):
     if prefs.families:
         query = query.where(Job.family.in_(prefs.families))
     jobs = list(db.scalars(query))
-    # Country is a hard filter. Unknown countries never match an explicit selection.
-    if prefs.countries:
-        jobs = [j for j in jobs if set(j.countries) & set(prefs.countries)]
-    return jobs
+    # Netherlands-only, including remote roles explicitly available here.
+    return [job for job in jobs if "NL" in job.countries]
 
 
 def ensure_requirements(db, job, use_llm=False):
@@ -156,7 +154,13 @@ def me(db: Session = Depends(get_db), user: User = Depends(current_user)):
     cv = latest_cv(db, user)
     evidence = cv_evidence(db, cv) if cv else []
     db.commit()
-    decisions = list(db.scalars(select(Decision).where(Decision.user_id == user.id)))
+    decisions = [
+        decision
+        for decision, job in db.execute(
+            select(Decision, Job).join(Job, Decision.job_id == Job.id).where(Decision.user_id == user.id)
+        )
+        if "NL" in job.countries
+    ]
     return {
         "cv": {
             "id": cv.id,
@@ -168,7 +172,7 @@ def me(db: Session = Depends(get_db), user: User = Depends(current_user)):
         if cv
         else None,
         "evidence": [evidence_dict(e) for e in evidence],
-        "preferences": user.preferences,
+        "preferences": saved_preferences(user).model_dump(),
         "saved": [d.job_id for d in decisions if d.state == "saved"],
         "skipped": [d.job_id for d in decisions if d.state == "skipped"],
     }
@@ -279,7 +283,7 @@ def matches(db: Session = Depends(get_db), user: User = Depends(current_user)):
 @app.get("/jobs/{job_id}")
 def job_detail(job_id: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
     job, cv = db.get(Job, job_id), latest_cv(db, user)
-    if not job:
+    if not job or "NL" not in job.countries:
         raise HTTPException(404, "Job not found")
     if not cv:
         raise HTTPException(409, "Add a CV first")
@@ -295,7 +299,8 @@ def job_detail(job_id: str, db: Session = Depends(get_db), user: User = Depends(
 def decision(
     job_id: str, value: DecisionInput, db: Session = Depends(get_db), user: User = Depends(current_user)
 ):
-    if not db.get(Job, job_id):
+    job = db.get(Job, job_id)
+    if not job or ("NL" not in job.countries and value.state != "none"):
         raise HTTPException(404, "Job not found")
     row = db.scalar(select(Decision).where(Decision.user_id == user.id, Decision.job_id == job_id))
     if value.state == "none":

@@ -38,3 +38,9 @@ for (const [rows, expected] of cases) {
 }
 assert.ok(demoJobs([]).some((job) => job.employment === "part-time"));
 console.log("Demo scoring and employment checks passed");
+
+assert.ok(demoJobs([]).every((job) => job.countries.includes("NL")));
+assert.equal(
+  "countries" in mod.exports.cleanPreferences({ countries: ["US"] }),
+  false,
+);

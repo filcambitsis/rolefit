@@ -22,46 +22,6 @@ from .normalization import (
 
 async def fetch_board(client: httpx.AsyncClient, source: dict) -> list[dict]:
     board, provider = source["board"], source["provider"]
-    if provider == "workable":
-        # Workable's public feed includes complete descriptions with details=true.
-        response = await client.get(
-            f"https://www.workable.com/api/accounts/{board}", params={"details": "true"}
-        )
-        response.raise_for_status()
-        payload = response.json()
-        if not isinstance(payload, dict) or not isinstance(payload.get("jobs"), list):
-            raise ValueError("Invalid Workable payload; refusing closed detection")
-        records = {}
-        for job in payload["jobs"]:
-            locations = job.get("locations") or [job]
-            # Keep every published location, including country restrictions on remote roles.
-            location = "; ".join(
-                ", ".join(str(place.get(key) or "") for key in ("city", "country")).strip(", ")
-                for place in locations
-                if not place.get("hidden", False)
-            )
-            # Some feeds repeat a posting for each office. Keep one job with all locations.
-            if job["shortcode"] in records:
-                previous = records[job["shortcode"]]
-                previous["location"] = "; ".join(
-                    dict.fromkeys(
-                        [part for part in (previous["location"] + "; " + location).split("; ") if part]
-                    )
-                )
-                continue
-            records[job["shortcode"]] = dict(
-                external_id=job["shortcode"],
-                title=job["title"],
-                url=job["url"],
-                raw=job["description"],
-                location=location,
-                employment=job.get("employment_type", ""),
-                workplace=(
-                    job.get("workplace_type") or ("remote" if job.get("telecommuting") else "")
-                ).replace("_", "-"),
-                country="",
-            )
-        return list(records.values())
     if provider == "greenhouse":
         response = await client.get(
             f"https://boards-api.greenhouse.io/v1/boards/{board}/jobs", params={"content": "true"}
@@ -85,9 +45,10 @@ async def fetch_board(client: httpx.AsyncClient, source: dict) -> list[dict]:
         ]
     if provider == "lever":
         jobs, skip = [], 0
+        host = "api.eu.lever.co" if source.get("region") == "eu" else "api.lever.co"
         while True:
             response = await client.get(
-                f"https://api.lever.co/v0/postings/{board}",
+                f"https://{host}/v0/postings/{board}",
                 params={"mode": "json", "limit": 100, "skip": skip},
             )
             response.raise_for_status()
@@ -230,15 +191,16 @@ async def crawl(db, seeds_path=None):
             report["boards"].append({**source, "error": error})
             continue
         records = [normalize(source, item) for item in items]
+        records = [row for row in records if "NL" in row["countries"]]
         counts = reconcile(db, source, records, now())
         db.commit()
-        report["boards"].append({**source, "fetched": len(records), **counts})
+        report["boards"].append({**source, "fetched": len(items), "imported_nl": len(records), **counts})
     # Recompute canonical copies from OPEN jobs: an old closed duplicate must not hide an open one.
     hashes = {}
     jobs = list(db.scalars(select(Job).order_by(Job.first_seen, Job.id)))
     for job in jobs:
         job.duplicate_of = None
-        if job.is_open:
+        if job.is_open and "NL" in job.countries:
             if job.content_hash in hashes:
                 job.duplicate_of = hashes[job.content_hash]
             else:
@@ -248,6 +210,7 @@ async def crawl(db, seeds_path=None):
         for j in jobs
         if j.is_open
         and not j.duplicate_of
+        and "NL" in j.countries
         and j.family in FAMILIES
         and j.language == "en"
         and j.employment in ("full-time", "part-time", "internship")
@@ -256,7 +219,7 @@ async def crawl(db, seeds_path=None):
         eligible=len(eligible),
         providers=dict(Counter(j.provider for j in eligible)),
         families=dict(Counter(j.family for j in eligible)),
-        total=len(jobs),
+        total=sum("NL" in job.countries for job in jobs),
     )
     run.report, run.finished_at = report, now()
     db.commit()

@@ -37,7 +37,6 @@ export type Job = {
 };
 export type Preferences = {
   families: string[];
-  countries: string[];
   employment: string[];
   workplace: string;
   search: string;
@@ -50,7 +49,6 @@ export const families = [
 ];
 export const defaults: Preferences = {
   families: [],
-  countries: [],
   employment: ["full-time", "part-time", "internship"],
   workplace: "any",
   search: "",
@@ -60,7 +58,9 @@ export const defaults: Preferences = {
 export function cleanPreferences(saved: Partial<Preferences>): Preferences {
   return {
     ...defaults,
-    ...saved,
+    employment: saved.employment ?? defaults.employment,
+    workplace: saved.workplace ?? defaults.workplace,
+    search: saved.search ?? defaults.search,
     families: (saved.families ?? []).filter((f) => families.includes(f)),
   };
 }
@@ -129,8 +129,8 @@ const templates = [
   [
     "Arc",
     "Machine Learning Engineer",
-    "London, United Kingdom",
-    "GB",
+    "Utrecht, Netherlands",
+    "NL",
     "ML Engineer",
     "remote",
     ["Python", "PyTorch", "AWS", "Docker"],
@@ -139,8 +139,8 @@ const templates = [
   [
     "Layers",
     "Applied AI Engineer",
-    "Berlin, Germany",
-    "DE",
+    "Rotterdam, Netherlands",
+    "NL",
     "AI Engineer",
     "hybrid",
     ["Python", "NLP", "Embeddings"],
@@ -159,8 +159,8 @@ const templates = [
   [
     "Orbit",
     "Data Analyst",
-    "Dublin, Ireland",
-    "IE",
+    "Eindhoven, Netherlands",
+    "NL",
     "Data Analyst",
     "remote",
     ["SQL", "Data visualization", "pandas"],
@@ -169,8 +169,8 @@ const templates = [
   [
     "Parallel",
     "ML Platform Engineer",
-    "London, United Kingdom",
-    "GB",
+    "Utrecht, Netherlands",
+    "NL",
     "ML Engineer",
     "on-site",
     ["Python", "Docker", "Kubernetes", "AWS"],
@@ -179,22 +179,12 @@ const templates = [
   [
     "Aperture",
     "Computer Vision Engineer",
-    "Paris, France",
-    "FR",
+    "The Hague, Netherlands",
+    "NL",
     "ML Engineer",
     "hybrid",
     ["Python", "PyTorch", "Computer vision"],
     ["Docker", "AWS"],
-  ],
-  [
-    "Aegean",
-    "Data Analyst",
-    "Athens, Greece",
-    "GR",
-    "Data Analyst",
-    "hybrid",
-    ["SQL", "Python", "Data visualization"],
-    ["Tableau", "Statistics"],
   ],
 ] as const;
 export function demoJobs(evidence: Evidence[]): Job[] {

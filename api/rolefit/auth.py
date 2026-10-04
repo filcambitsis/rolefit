@@ -1,8 +1,10 @@
 from functools import lru_cache
+from ipaddress import ip_address
+from urllib.parse import urlsplit
 from uuid import UUID
 
 import jwt
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -22,10 +24,25 @@ def jwks():
 
 
 def current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer), db: Session = Depends(get_db)
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
+    db: Session = Depends(get_db),
 ):
     config = settings()
     if config.app_env == "development" and config.dev_auth and credentials is None:
+        # Check both the socket peer and URL to prevent remote use and DNS rebinding.
+        try:
+            local_peer = bool(request.client and ip_address(request.client.host).is_loopback)
+        except ValueError:
+            local_peer = False
+        allowed = {"localhost", "127.0.0.1", "::1"}
+        origin = request.headers.get("origin")
+        if (
+            not local_peer
+            or request.url.hostname not in allowed
+            or (origin and urlsplit(origin).hostname not in allowed)
+        ):
+            raise HTTPException(403, "Development authentication is limited to localhost")
         user_id = DEV_USER
     else:
         if credentials is None or not config.supabase_url:

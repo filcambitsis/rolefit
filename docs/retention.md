@@ -2,9 +2,9 @@
 
 Original uploads are read with a 5 MB cap and closed in a finally block on both success and failure. The temporary upload is removed when closed. No original file is copied into application storage. Text and verified evidence are retained in the application database for matching. Uploading another CV replaces the prior CV and cascades its evidence deletion.
 
-Every CV query and mutation is scoped to the Supabase UUID established by a verified RS256/ES256 token. Application data is in our own database. Supabase handles authentication only. Production rejects development authentication. Never expose a DEV_AUTH server outside loopback or a trusted local container network.
+Every CV query and mutation is scoped to the Supabase UUID established by a verified RS256/ES256 token. Application data is in our own database. Supabase handles authentication only. Production rejects development authentication. Development authentication requires a loopback socket peer, localhost URL and local Origin. The normal run command also disables proxy-header trust. Containers require real authentication; a bridge-network peer cannot use the development bypass.
 
-LLM CV cache entries are scoped by user ID and content hash; no cross-user cache reuse. Deleting a CV removes its raw text, evidence and user-scoped extraction cache. Account-data deletion also removes saved/skipped decisions and preferences. Supabase account deletion is an independent identity-provider operation.
+LLM CV cache entries are scoped by user ID and content hash; no cross-user cache reuse. Deleting a CV removes its raw text, evidence and user-scoped extraction cache and legacy adjudication caches belonging to its CV. Replacement also clears those caches. Account-data deletion also removes saved/skipped decisions and preferences. Supabase account deletion is an independent identity-provider operation.
 
 The browser demo keeps pasted CV text only in memory. It stores only sample saved-job IDs and preferences in local storage. Browser refresh discards the CV text. Public fixtures must be fictional, or explicitly anonymized and approved. The bundled sample CV (`data/sample-cv.txt`) is fictional.
 

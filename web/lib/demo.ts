@@ -27,7 +27,7 @@ export type Job = {
   workplace: string;
   provider: string;
   url: string;
-  score: number;
+  score: number | null;
   required_coverage: number;
   requirements: Requirement[];
   description?: string;
@@ -199,22 +199,15 @@ export function demoJobs(evidence: Evidence[]): Job[] {
           id: `r-${i}-${ri}`,
           text: `Experience with ${r.skill}`,
           ...r,
-          status: ev ? "met" : "missing",
+          status: ev ? "met" : "not_verified",
           tier: ev ? "vocabulary" : "unverified",
           evidence: ev || null,
         };
       });
       const required = requirements.filter((r) => r.required);
-      const preferred = requirements.filter((r) => !r.required);
       const coverage =
         required.filter((r) => r.status === "met").length / required.length;
-      const score = Math.round(
-        100 *
-          (coverage * 0.85 +
-            (preferred.filter((r) => r.status === "met").length /
-              preferred.length) *
-              0.15),
-      );
+      const score = requirementScore(requirements);
       return {
         id: `demo-${i}`,
         company: t[0],
@@ -222,7 +215,7 @@ export function demoJobs(evidence: Evidence[]): Job[] {
         location: t[2],
         countries: [t[3]],
         family: t[4],
-        employment: i === 7 ? "part-time" : "full-time",
+        employment: t[0] === "Aperture" ? "part-time" : "full-time",
         employment_provenance: "sample",
         workplace: t[5],
         provider: ["greenhouse", "lever", "ashby"][i % 3],
@@ -231,10 +224,30 @@ export function demoJobs(evidence: Evidence[]): Job[] {
         required_coverage: coverage,
         requirements,
         first_seen: "2026-09-14",
-        method: "Evidence coverage preview",
+        method: "Requirement coverage",
         description:
           "This illustrative role is part of the sample workspace. Requirements demonstrate how RoleFit connects a job to verified passages in a CV. Connect the backend to browse current postings from employers.",
       };
     })
-    .sort((a, b) => b.score - a.score);
+    .sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
+}
+
+// Match the API: absent requirement groups do not reduce the available score.
+export function requirementScore(requirements: Requirement[]): number | null {
+  if (!requirements.length) return null;
+  let earned = 0,
+    total = 0;
+  for (const [required, weight] of [
+    [true, 0.85],
+    [false, 0.15],
+  ] as const) {
+    const group = requirements.filter((r) => r.required === required);
+    if (group.length) {
+      earned +=
+        (weight * group.filter((r) => r.status === "met").length) /
+        group.length;
+      total += weight;
+    }
+  }
+  return Math.round((100 * earned) / total);
 }

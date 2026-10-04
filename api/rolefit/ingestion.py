@@ -8,7 +8,16 @@ from sqlalchemy import select
 
 from .config import ROOT
 from .models import CrawlRun, Job, now
-from .normalization import content_hash, countries, employment, family, language, strip_html, workplace
+from .normalization import (
+    FAMILIES,
+    content_hash,
+    countries,
+    employment,
+    family,
+    language,
+    strip_html,
+    workplace,
+)
 
 
 async def fetch_board(client: httpx.AsyncClient, source: dict) -> list[dict]:
@@ -199,7 +208,7 @@ async def crawl(db, seeds_path=None):
         for j in jobs
         if j.is_open
         and not j.duplicate_of
-        and j.family
+        and j.family in FAMILIES
         and j.language == "en"
         and j.employment in ("full-time", "part-time", "internship")
     ]

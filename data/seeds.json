@@ -1,27 +1,112 @@
 [
- {"provider":"greenhouse","board":"databricks","company":"Databricks"},
- {"provider":"greenhouse","board":"cloudflare","company":"Cloudflare"},
- {"provider":"greenhouse","board":"reddit","company":"Reddit"},
- {"provider":"greenhouse","board":"figma","company":"Figma"},
- {"provider":"greenhouse","board":"stripe","company":"Stripe"},
- {"provider":"greenhouse","board":"airbnb","company":"Airbnb"},
- {"provider":"greenhouse","board":"mongodb","company":"MongoDB"},
- {"provider":"greenhouse","board":"scaleai","company":"Scale AI"},
- {"provider":"greenhouse","board":"duolingo","company":"Duolingo"},
- {"provider":"greenhouse","board":"hubspotjobs","company":"HubSpot"},
- {"provider":"lever","board":"spotify","company":"Spotify"},
- {"provider":"lever","board":"mistral","company":"Mistral AI"},
- {"provider":"lever","board":"palantir","company":"Palantir"},
- {"provider":"lever","board":"netflix","company":"Netflix"},
- {"provider":"lever","board":"welocalize","company":"Welocalize"},
- {"provider":"lever","board":"zoox","company":"Zoox"},
- {"provider":"lever","board":"contentsquare","company":"Contentsquare"},
- {"provider":"ashby","board":"openai","company":"OpenAI"},
- {"provider":"ashby","board":"anthropic","company":"Anthropic"},
- {"provider":"ashby","board":"cohere","company":"Cohere"},
- {"provider":"ashby","board":"notion","company":"Notion"},
- {"provider":"ashby","board":"ramp","company":"Ramp"},
- {"provider":"ashby","board":"perplexity","company":"Perplexity"},
- {"provider":"ashby","board":"deepgram","company":"Deepgram"},
- {"provider":"ashby","board":"cursor","company":"Cursor"}
+  {
+    "provider": "greenhouse",
+    "board": "databricks",
+    "company": "Databricks"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "cloudflare",
+    "company": "Cloudflare"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "reddit",
+    "company": "Reddit"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "figma",
+    "company": "Figma"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "stripe",
+    "company": "Stripe"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "airbnb",
+    "company": "Airbnb"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "mongodb",
+    "company": "MongoDB"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "scaleai",
+    "company": "Scale AI"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "duolingo",
+    "company": "Duolingo"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "hubspotjobs",
+    "company": "HubSpot"
+  },
+  {
+    "provider": "lever",
+    "board": "spotify",
+    "company": "Spotify"
+  },
+  {
+    "provider": "lever",
+    "board": "mistral",
+    "company": "Mistral AI"
+  },
+  {
+    "provider": "lever",
+    "board": "palantir",
+    "company": "Palantir"
+  },
+  {
+    "provider": "lever",
+    "board": "zoox",
+    "company": "Zoox"
+  },
+  {
+    "provider": "lever",
+    "board": "contentsquare",
+    "company": "Contentsquare"
+  },
+  {
+    "provider": "ashby",
+    "board": "openai",
+    "company": "OpenAI"
+  },
+  {
+    "provider": "ashby",
+    "board": "cohere",
+    "company": "Cohere"
+  },
+  {
+    "provider": "ashby",
+    "board": "notion",
+    "company": "Notion"
+  },
+  {
+    "provider": "ashby",
+    "board": "ramp",
+    "company": "Ramp"
+  },
+  {
+    "provider": "ashby",
+    "board": "perplexity",
+    "company": "Perplexity"
+  },
+  {
+    "provider": "ashby",
+    "board": "deepgram",
+    "company": "Deepgram"
+  },
+  {
+    "provider": "ashby",
+    "board": "cursor",
+    "company": "Cursor"
+  }
 ]

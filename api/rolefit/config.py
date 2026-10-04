@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     database_url: str = f"sqlite:///{ROOT}/work/rolefit.db"
     app_env: str = "development"
     dev_auth: bool = False
-    cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    cors_origins: list[str] = ["http://localhost:3002", "http://127.0.0.1:3002"]
     supabase_url: str = ""
     supabase_audience: str = "authenticated"
     llm_base_url: str = "https://api.openai.com/v1"

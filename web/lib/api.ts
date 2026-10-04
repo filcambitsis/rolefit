@@ -16,10 +16,17 @@ export async function request<T>(
   if (session) headers.Authorization = `Bearer ${session.access_token}`;
   if (options.body && !(options.body instanceof FormData))
     headers["Content-Type"] = "application/json";
-  const res = await fetch(`${base}${path}`, {
-    ...options,
-    headers: { ...headers, ...options.headers },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${base}${path}`, {
+      ...options,
+      headers: { ...headers, ...options.headers },
+    });
+  } catch {
+    throw new Error(
+      "Could not reach RoleFit. Check that the server is running and try again.",
+    );
+  }
   if (!res.ok) {
     const body = await res
       .json()

@@ -1,6 +1,6 @@
 {
-  "version": "reviewed-1",
-  "note": "Hand-reviewed skill list. Aliases are matched as whole words, case-insensitive. Avoid aliases that are also common English words (e.g. 'excel', 'spark').",
+  "version": "reviewed-2",
+  "note": "Hand-reviewed skill list. Aliases are matched as whole words, case-insensitive. Ambiguous short names such as Excel and Spark require skill-list or technical context in skills.py.",
   "skills": [
     {"id": "python", "label": "Python", "aliases": ["python", "python3"]},
     {"id": "sql", "label": "SQL", "aliases": ["sql", "postgresql", "postgres", "mysql"]},
@@ -63,18 +63,21 @@
     {"id": "dutch", "label": "Dutch", "aliases": ["dutch"]},
     {"id": "r", "label": "R", "aliases": ["r programming", "rstudio", "tidyverse", "ggplot2"]},
     {"id": "excel", "label": "Excel", "aliases": ["microsoft excel", "ms excel", "advanced excel"]},
+    {"id": "lightgbm", "label": "LightGBM", "aliases": ["lightgbm"]},
+    {"id": "hive", "label": "Hive", "aliases": ["apache hive", "hive"]},
+    {"id": "opensearch", "label": "OpenSearch", "aliases": ["opensearch"]},
     {"id": "keras", "label": "Keras", "aliases": ["keras"]},
-    {"id": "xgboost", "label": "XGBoost", "aliases": ["xgboost", "lightgbm"]},
+    {"id": "xgboost", "label": "XGBoost", "aliases": ["xgboost"]},
     {"id": "looker", "label": "Looker", "aliases": ["looker"]},
     {"id": "go", "label": "Go", "aliases": ["golang"]},
     {"id": "rust", "label": "Rust", "aliases": ["rust"]},
     {"id": "flask", "label": "Flask", "aliases": ["flask"]},
     {"id": "django", "label": "Django", "aliases": ["django"]},
     {"id": "jupyter", "label": "Jupyter", "aliases": ["jupyter", "jupyter notebooks"]},
-    {"id": "hadoop", "label": "Hadoop", "aliases": ["hadoop", "hive"]},
+    {"id": "hadoop", "label": "Hadoop", "aliases": ["hadoop"]},
     {"id": "transformers", "label": "Transformers", "aliases": ["transformer models", "transformers"]},
     {"id": "prompting", "label": "Prompt engineering", "aliases": ["prompt engineering", "prompt design"]},
     {"id": "agents", "label": "AI agents", "aliases": ["ai agents", "llm agents", "agentic"]},
-    {"id": "elasticsearch", "label": "Elasticsearch", "aliases": ["elasticsearch", "opensearch"]}
+    {"id": "elasticsearch", "label": "Elasticsearch", "aliases": ["elasticsearch"]}
   ]
 }

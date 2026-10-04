@@ -16,7 +16,7 @@ from .skills import mentions, normalize_skill
 
 # Bump this when extraction rules or the skills vocabulary change:
 # stored requirements with an older version are extracted again.
-PROMPT_VERSION = "evidence-v2"
+PROMPT_VERSION = "evidence-v6"
 MAX_TEXT = 150_000
 
 
@@ -165,6 +165,27 @@ def cached_call(db, scope, kind, raw, schema, instructions):
     return result
 
 
+SECTION_HEADINGS = {
+    "experience": "experience",
+    "work experience": "experience",
+    "professional experience": "experience",
+    "employment": "experience",
+    "education": "education",
+    "education and qualifications": "education",
+    "projects": "projects",
+    "key projects": "projects",
+    "personal projects": "projects",
+    "skills": "skills",
+    "technical skills": "skills",
+    "skills and interests": "skills",
+    "languages": "languages",
+    "profile": "other",
+    "summary": "other",
+    "additional information": "other",
+    "leadership and activities": "other",
+}
+
+
 def extract_cv(raw, db=None, scope="development", use_llm=False):
     if use_llm:
         parsed = cached_call(
@@ -180,9 +201,10 @@ def extract_cv(raw, db=None, scope="development", use_llm=False):
         candidates, section = [], "other"
         for line in raw.splitlines():
             quote = line.strip()
-            if re.fullmatch(r"(experience|education|projects|skills|languages)", quote, re.I):
-                section = quote.lower()
-            elif len(quote) >= 15:
+            heading = " ".join(quote.lower().replace("&", "and").rstrip(":").split())
+            if heading in SECTION_HEADINGS:
+                section = SECTION_HEADINGS[heading]
+            elif len(quote) >= 15 or mentions(quote):
                 candidates.append({"quote": quote, "section": section})
     evidence, failures = [], 0
     for item in candidates:
@@ -206,34 +228,78 @@ def extract_requirements(raw, db=None, use_llm=False):
         )
         candidates = [item.model_dump() for item in parsed.items]
     else:
-        candidates, preferred = [], False
+        candidates, preferred, in_requirements = [], False, False
         for line in raw.splitlines():
-            if re.search(r"nice to have|preferred|bonus|desirable", line, re.I):
-                preferred = True
-            if re.search(r"required|requirements|qualifications|must have|what you.bring", line, re.I):
-                preferred = False
-            if len(line) < 10 or len(line) > 1500:
+            line = line.strip()
+            heading = line.lower().strip(": ")
+            # Section boundaries prevent company blurbs and benefits becoming requirements.
+            if len(line) < 160 and re.search(
+                r"^(nice to haves?|preferred qualifications|preferred requirements|bonus|desirable|"
+                r"especially strong backgrounds|it would be great|while it.s not required|any of the following|"
+                r"ideally you.{0,3}(?:d |would )have)",
+                heading,
+            ):
+                preferred, in_requirements = True, True
                 continue
-            if not re.search(
-                r"experience|proficien|knowledge|familiar|ability|skilled|degree|fluent|\byears?\b",
+            if len(line) < 100 and re.search(
+                r"^(minimum requirements|required qualifications|requirements|qualifications|must haves?|what you.bring|"
+                r"it.s important to us|essential skills|minimum qualifications|"
+                r"what you.ll bring|what we.re looking for|you may be a fit if|you should have|you.ll need|"
+                r"we.d love|we.re looking for|you might be a fit|skills and experience|what you.ll need|"
+                r"what you need|who you are|about you|what we look for|skills you|you might thrive|you may be a good fit)",
+                heading,
+            ):
+                preferred, in_requirements = False, True
+                continue
+            if re.search(
+                r"^(about us|about the |who we are|what you.ll do|you will:?$|responsibilities|"
+                r"benefits|compensation|applying|please note|we offer|equal opportunity|about |"
+                r"we hire|full.time employees|how and where we work|a note on ai|by clicking|#li-|notice$|working location|our research interviews)",
+                heading,
+            ):
+                in_requirements = False
+                continue
+            if re.search(
+                r"equal opportunity|privacy policy|compensation offered|cash compensation|"
+                r"reasonable accommodations|base salary|we encourage you to apply",
+                line,
+                re.I,
+            ):
+                in_requirements = False
+                continue
+            if len(line) < 5 or len(line) > 1500:
+                continue
+            if not in_requirements and not re.search(
+                r"^(?:you must|we require|must have)",
                 line,
                 re.I,
             ):
                 continue
-            skills = mentions(line)
-            if skills:
-                candidates.extend(
-                    {"quote": line, "category": "skill", "skill": s, "required": not preferred}
-                    for s in skills
+            if re.search(r"no .{0,30}(?:experience|degree) (?:is )?(?:required|necessary)", line, re.I):
+                continue
+            required = not preferred and not bool(
+                re.search(r"nice to have|(?:is|will be) a plus|not required|preferred", line, re.I)
+            )
+            # Preserve unsupported requirements too; dropping them inflates coverage.
+            if re.search(r"\b(?:bachelor|master|ph\.?d|ph\.d\.|BS/BA|MS/MA|degree)\b", line, re.I):
+                candidates.append(
+                    {"quote": line, "category": "education", "skill": None, "required": required}
                 )
             elif minimum_years(line) is not None:
                 candidates.append(
-                    {"quote": line, "category": "experience", "skill": None, "required": not preferred}
+                    {"quote": line, "category": "experience", "skill": None, "required": required}
                 )
-            elif re.search(r"bachelor|master|ph\.?d", line, re.I):
-                candidates.append(
-                    {"quote": line, "category": "education", "skill": None, "required": not preferred}
-                )
+            else:
+                skills = mentions(line)
+                if skills:
+                    candidates.extend(
+                        {"quote": line, "category": "skill", "skill": skill, "required": required}
+                        for skill in skills
+                    )
+                elif in_requirements:
+                    candidates.append(
+                        {"quote": line, "category": "other", "skill": None, "required": required}
+                    )
     out, seen = [], set()
     for candidate in candidates:
         if verified_span(raw, candidate["quote"]) is None:
@@ -249,7 +315,7 @@ def extract_requirements(raw, db=None, use_llm=False):
         out.append(
             {
                 "quote": candidate["quote"],
-                "text": f"Experience with {skill}" if skill else candidate["quote"],
+                "text": candidate["quote"],
                 "category": candidate["category"],
                 "skill": skill,
                 "required": candidate["required"],

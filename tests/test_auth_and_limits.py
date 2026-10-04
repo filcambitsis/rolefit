@@ -52,17 +52,17 @@ def test_jwt_signature_issuer_audience_expiry(monkeypatch, db):
             scheme="Bearer", credentials=jwt.encode(data, key, algorithm="RS256")
         )
 
-    assert auth.current_user(credentials(payload), db).id == payload["sub"]
+    assert auth.current_user(None, credentials(payload), db).id == payload["sub"]
     for changed in [
         {"aud": "wrong"},
         {"iss": "https://attacker.example"},
         {"exp": datetime.now(timezone.utc) - timedelta(minutes=5)},
     ]:
         with pytest.raises(HTTPException) as caught:
-            auth.current_user(credentials({**payload, **changed}), db)
+            auth.current_user(None, credentials({**payload, **changed}), db)
         assert caught.value.status_code == 401
     with pytest.raises(HTTPException):
-        auth.current_user(None, db)
+        auth.current_user(None, None, db)
 
 
 def test_budget_cap_stops_before_remote_call(db, monkeypatch):
@@ -95,3 +95,38 @@ def test_schema_rejects_extra_fields_and_bad_sections():
             {"items": [{"quote": "invented", "section": "instructions", "score": 99}]}
         )
 
+
+@pytest.mark.parametrize(
+    "peer,host,origin,allowed",
+    [
+        ("127.0.0.1", "127.0.0.1:8000", "http://127.0.0.1:3002", True),
+        ("::1", "localhost:8000", None, True),
+        ("192.168.1.10", "localhost:8000", None, False),
+        ("127.0.0.1", "evil.example", None, False),
+        ("127.0.0.1", "localhost:8000", "https://evil.example", False),
+    ],
+)
+def test_dev_auth_localhost_only(monkeypatch, db, peer, host, origin, allowed):
+    from starlette.requests import Request
+
+    monkeypatch.setattr(auth, "settings", lambda: SimpleNamespace(app_env="development", dev_auth=True))
+    headers = [(b"host", host.encode())]
+    if origin:
+        headers.append((b"origin", origin.encode()))
+    request = Request(
+        {
+            "type": "http",
+            "scheme": "http",
+            "path": "/",
+            "headers": headers,
+            "client": (peer, 1234),
+            "server": ("127.0.0.1", 8000),
+            "query_string": b"",
+        }
+    )
+    if allowed:
+        assert auth.current_user(request, None, db).id == auth.DEV_USER
+    else:
+        with pytest.raises(HTTPException) as caught:
+            auth.current_user(request, None, db)
+        assert caught.value.status_code == 403

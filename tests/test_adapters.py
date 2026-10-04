@@ -71,3 +71,27 @@ def test_invalid_board_payload_is_not_empty_success():
                 await fetch_board(client, {"provider": "greenhouse", "board": "test"})
 
     asyncio.run(run())
+
+
+def test_failed_crawl_preserves_old_jobs(db, job, monkeypatch, tmp_path):
+    import json
+    from datetime import timedelta
+    from rolefit import ingestion
+    from rolefit.models import now
+
+    job.last_seen = now() - timedelta(days=10)
+    db.commit()
+    seeds = tmp_path / "seeds.json"
+    seeds.write_text(json.dumps([{"provider": job.provider, "board": job.board, "company": job.company}]))
+
+    async def failed(*args):
+        raise ValueError("Board unavailable")
+
+    async def no_wait(*args):
+        pass
+
+    monkeypatch.setattr(ingestion, "fetch_board", failed)
+    monkeypatch.setattr(ingestion.asyncio, "sleep", no_wait)
+    report = asyncio.run(ingestion.crawl(db, seeds))
+    assert report["boards"][0]["error"] == "Board unavailable"
+    assert job.is_open

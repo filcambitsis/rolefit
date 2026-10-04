@@ -2153,10 +2153,12 @@ textarea::placeholder {
 @media (max-width: 760px) {
   .sidebar {
     transform: translateX(-100%);
+    visibility: hidden;
     transition: transform 0.25s;
     width: 238px;
   }
   .sidebar-open {
+    visibility: visible;
     transform: translateX(0);
   }
   .nav-backdrop {
@@ -2575,5 +2577,35 @@ textarea::placeholder {
   }
   .sidebar-note p {
     font-size: 13px;
+  }
+}
+
+/* Let the sorting control wrap instead of widening narrow screens. */
+.results-column {
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .results-toolbar {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .tabs {
+    gap: 16px;
+  }
+  .sort-label {
+    margin-left: auto;
+    padding-bottom: 10px;
+  }
+  .fit-summary {
+    min-width: 0;
+  }
+  .fit-summary > div {
+    min-width: 0;
+  }
+  .topbar-right {
+    gap: 6px;
+  }
+  .overview-stat > span {
+    letter-spacing: 0.04em;
   }
 }

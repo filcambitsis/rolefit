@@ -10,11 +10,12 @@ from .auth import current_user
 from .config import settings
 from .db import get_db
 from .extraction import PROMPT_VERSION, extract_cv, extract_requirements, parse_file
-from .matching import coverage, evidence_dict, match_requirement
+from .matching import coverage, evidence_dict, match_requirement, requirement_score
 from .models import CV, CrawlRun, Decision, Evidence, ExtractionCache, Job, Requirement, User
 from .normalization import FAMILIES
 from .ranking import bm25_scores
 from .schemas import DecisionInput, Preferences
+from .skills import mentions
 
 app = FastAPI(
     title="RoleFit",
@@ -32,6 +33,33 @@ app.add_middleware(
 
 def latest_cv(db, user):
     return db.scalar(select(CV).where(CV.user_id == user.id).order_by(CV.created_at.desc()))
+
+
+def cv_evidence(db, cv):
+    rows = list(db.scalars(select(Evidence).where(Evidence.cv_id == cv.id)))
+    # Rebuild older local extractions to recover short skills and revised headings.
+    # Never resend an existing CV to an external model during a read.
+    if cv.prompt_version != PROMPT_VERSION and cv.model_version == "deterministic-preview-v1":
+        items, failed, total = extract_cv(cv.text)
+        db.execute(delete(Evidence).where(Evidence.cv_id == cv.id))
+        rows = [Evidence(cv_id=cv.id, **item) for item in items]
+        db.add_all(rows)
+        cv.prompt_version = PROMPT_VERSION
+        cv.verification_failures, cv.extraction_count = failed, total
+        db.flush()
+    # Model-extracted passages keep their quotes and provenance; only skill tags change.
+    for row in rows:
+        skills = mentions(row.quote)
+        if row.skills != skills:
+            row.skills = skills
+    return rows
+
+
+def clear_cv_cache(db, user):
+    cv_ids = db.scalars(select(CV.id).where(CV.user_id == user.id))
+    scopes = [user.id, *("adjudication:" + cv_id for cv_id in cv_ids)]
+    # Old adjudication results can contain CV quotes even though the feature is gone.
+    db.execute(delete(ExtractionCache).where(ExtractionCache.scope.in_(scopes)))
 
 
 def saved_preferences(user):
@@ -87,7 +115,7 @@ def job_payload(db, job, cv, evidence):
     """A job plus, for each requirement, whether the CV supports it."""
     requirements = ensure_requirements(db, job)
     decisions = [match_requirement(r, evidence, cv.text) for r in requirements]
-    score = round(100 * (0.85 * coverage(decisions, True) + 0.15 * coverage(decisions, False)))
+    score = requirement_score(decisions)
     return {
         "id": job.id,
         "title": job.title,
@@ -104,7 +132,7 @@ def job_payload(db, job, cv, evidence):
         "required_coverage": coverage(decisions, True),
         "requirements": decisions,
         "first_seen": job.first_seen.isoformat(),
-        "method": "Evidence coverage preview (untrained)",
+        "method": "Requirement coverage",
     }
 
 
@@ -126,7 +154,8 @@ def auth_callback(user: User = Depends(current_user)):
 @app.get("/me")
 def me(db: Session = Depends(get_db), user: User = Depends(current_user)):
     cv = latest_cv(db, user)
-    evidence = list(db.scalars(select(Evidence).where(Evidence.cv_id == cv.id))) if cv else []
+    evidence = cv_evidence(db, cv) if cv else []
+    db.commit()
     decisions = list(db.scalars(select(Decision).where(Decision.user_id == user.id)))
     return {
         "cv": {
@@ -170,6 +199,7 @@ async def upload_cv(
         raise HTTPException(422, "CV structuring failed. Check extraction configuration and budget.") from exc
     if not items:
         raise HTTPException(422, "No verifiable evidence was found")
+    clear_cv_cache(db, user)
     db.execute(delete(CV).where(CV.user_id == user.id))
     cv = CV(
         user_id=user.id,
@@ -200,7 +230,7 @@ async def upload_cv(
 @app.delete("/cv", status_code=204)
 def delete_cv(db: Session = Depends(get_db), user: User = Depends(current_user)):
     # Also remove any cached model output made from this user's CV.
-    db.execute(delete(ExtractionCache).where(ExtractionCache.scope == user.id))
+    clear_cv_cache(db, user)
     db.execute(delete(CV).where(CV.user_id == user.id))
     db.commit()
 
@@ -225,17 +255,24 @@ def matches(db: Session = Depends(get_db), user: User = Depends(current_user)):
     if cv is None:
         raise HTTPException(409, "Add a CV before finding matches")
     jobs = candidates(db, saved_preferences(user))
-    evidence = list(db.scalars(select(Evidence).where(Evidence.cv_id == cv.id)))
+    evidence = cv_evidence(db, cv)
     result = [job_payload(db, job, cv, evidence) for job in jobs]
     # Rank by requirement coverage. When two jobs tie, the one whose text
     # shares more words with the CV (BM25) comes first.
     overlap = bm25_scores([j.title + "\n" + j.description for j in jobs], cv.text)
-    ranked = sorted(zip(result, overlap), key=lambda pair: (-pair[0]["score"], -pair[1], pair[0]["id"]))
+    ranked = sorted(
+        zip(result, overlap),
+        key=lambda pair: (
+            -(pair[0]["score"] if pair[0]["score"] is not None else -1),
+            -pair[1],
+            pair[0]["id"],
+        ),
+    )
     db.commit()
     return {
         "jobs": [row for row, _ in ranked],
         "candidate_count": len(jobs),
-        "method": "Evidence coverage preview",
+        "method": "Requirement coverage",
     }
 
 
@@ -246,7 +283,7 @@ def job_detail(job_id: str, db: Session = Depends(get_db), user: User = Depends(
         raise HTTPException(404, "Job not found")
     if not cv:
         raise HTTPException(409, "Add a CV first")
-    evidence = list(db.scalars(select(Evidence).where(Evidence.cv_id == cv.id)))
+    evidence = cv_evidence(db, cv)
     result = job_payload(db, job, cv, evidence)
     result["description"] = job.description
     result["is_open"] = job.is_open

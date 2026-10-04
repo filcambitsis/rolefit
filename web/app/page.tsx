@@ -56,11 +56,21 @@ const countries = [
   ["IN", "India"],
 ];
 
-function Score({ score, large = false }: { score: number; large?: boolean }) {
+function Score({
+  score,
+  large = false,
+}: {
+  score: number | null;
+  large?: boolean;
+}) {
   return (
     <div
       className={`score ${large ? "score-large" : ""}`}
-      aria-label={`${score} out of 100 evidence coverage score`}
+      aria-label={
+        score === null
+          ? "Not enough requirements extracted"
+          : `${score}% requirement coverage`
+      }
     >
       <svg viewBox="0 0 72 72">
         <circle className="score-track" cx="36" cy="36" r="30" />
@@ -69,12 +79,12 @@ function Score({ score, large = false }: { score: number; large?: boolean }) {
           cx="36"
           cy="36"
           r="30"
-          strokeDasharray={`${score * 1.885} 188.5`}
+          strokeDasharray={`${(score ?? 0) * 1.885} 188.5`}
         />
       </svg>
       <span>
-        {score}
-        <small>{large ? "OUT OF 100" : "%"}</small>
+        {score ?? "—"}
+        <small>{score === null ? "N/A" : large ? "OUT OF 100" : "%"}</small>
       </span>
     </div>
   );
@@ -375,7 +385,7 @@ export default function Home() {
       : (prefs.workplace !== "any"
           ? Number(b.workplace === prefs.workplace) -
             Number(a.workplace === prefs.workplace)
-          : 0) || b.score - a.score,
+          : 0) || (b.score ?? -1) - (a.score ?? -1),
   );
   const strong = jobs.filter(
     (j) => j.required_coverage >= 0.8 && !skipped.includes(j.id),
@@ -510,7 +520,7 @@ export default function Home() {
               aria-label="How matching works"
               onClick={() =>
                 setNotice(
-                  "The preview score is 85% required and 15% preferred evidence coverage. It is not an application success probability.",
+                  "Requirement coverage measures support in your CV for extracted job requirements. Required items carry 85% and preferred items 15%; if only one group exists it carries 100%. No extracted requirements means no score. This is not a hiring probability.",
                 )
               }
             >
@@ -629,7 +639,7 @@ export default function Home() {
                     <div className="overview-stat">
                       <span>
                         <span className="stat-dot" />
-                        STRONG EVIDENCE FIT
+                        HIGH REQUIREMENT COVERAGE
                       </span>
                       <strong>
                         {strong.toString().padStart(2, "0")}
@@ -666,7 +676,7 @@ export default function Home() {
                             className={tab === "strong" ? "selected" : ""}
                             onClick={() => setTab("strong")}
                           >
-                            Strong fits <Sparkles size={14} />
+                            High coverage <Sparkles size={14} />
                           </button>
                         </div>
                         <label className="sort-label">
@@ -676,7 +686,7 @@ export default function Home() {
                             value={sort}
                             onChange={(e) => setSort(e.target.value)}
                           >
-                            <option value="score">Best fit</option>
+                            <option value="score">Requirement coverage</option>
                             <option value="newest">Most recent</option>
                           </select>
                           <ChevronDown size={13} />
@@ -802,11 +812,9 @@ export default function Home() {
                                 <Score score={job.score} />
                                 <div>
                                   <strong>
-                                    {job.required_coverage >= 0.8
-                                      ? "Strong evidence fit"
-                                      : job.required_coverage >= 0.5
-                                        ? "Some relevant experience"
-                                        : "Room to grow"}
+                                    {job.score === null
+                                      ? "Not enough requirements extracted"
+                                      : "Requirement coverage"}
                                   </strong>
                                   <span>
                                     {
@@ -819,15 +827,31 @@ export default function Home() {
                                       job.requirements.filter((r) => r.required)
                                         .length
                                     }{" "}
-                                    required skills backed by evidence
+                                    required items supported
                                   </span>
+                                  <span>
+                                    {(job.requirements.length < 5 ||
+                                      job.requirements.filter((r) => r.required)
+                                        .length < 3) &&
+                                    job.score !== null
+                                      ? "Limited extraction · review the full posting"
+                                      : "Skill mentions do not establish proficiency"}
+                                  </span>
+                                  {/senior|staff|principal|director|head of|lead /i.test(
+                                    job.title,
+                                  ) && (
+                                    <span>
+                                      Senior role · check experience
+                                      requirements
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                               <button
                                 className="text-button"
                                 onClick={() => openJob(job)}
                               >
-                                View fit <ArrowUpRight size={17} />
+                                View evidence <ArrowUpRight size={17} />
                               </button>
                             </div>
                           </article>
@@ -962,8 +986,8 @@ export default function Home() {
                         </h2>
                         <p>
                           No mystery score. Open any role to see what fits,
-                          what’s missing, and the exact lines in your CV behind
-                          it.
+                          what’s not verified, and the exact lines in your CV
+                          behind it.
                         </p>
                         <div className="how-example">
                           <div>
@@ -976,7 +1000,8 @@ export default function Home() {
                           </span>
                         </div>
                         <span className="method-note">
-                          Scores show evidence coverage, not hiring probability.
+                          Scores show requirement coverage, not hiring
+                          probability.
                         </span>
                       </div>
                       <div className="source-note">
@@ -1414,13 +1439,17 @@ export default function Home() {
               <div className="detail-score">
                 <Score score={selected.score} large />
                 <div>
-                  <span className="eyebrow">YOUR EVIDENCE FIT</span>
+                  <span className="eyebrow">REQUIREMENT COVERAGE</span>
                   <h2>
-                    {Math.round(selected.required_coverage * 100)}% of required
-                    skills supported
+                    {selected.score === null
+                      ? "Not enough requirements extracted"
+                      : `${selected.score}% requirement coverage`}
                   </h2>
                   <p>
-                    {selected.method}. This score is not a hiring probability.
+                    Coverage measures support for extracted requirements only.
+                    Required items carry 85% and preferred items 15%; a sole
+                    group carries 100%. It is not a hiring probability. A high
+                    score based on few requirements can be misleading.
                   </p>
                 </div>
               </div>
@@ -1435,10 +1464,19 @@ export default function Home() {
                 </span>
               </div>
               <p className="breakdown-intro">
-                Matched means we found supporting evidence. Missing means we
-                couldn’t verify it in your CV.
+                Supported means a CV passage matches our checks. “Not verified
+                in your CV” means no supporting passage was found, not that you
+                lack the skill. Skill matches confirm a mention, not proficiency
+                or every condition in the sentence. Degree and experience
+                requirements need your review.
               </p>
               <div className="requirements">
+                {selected.requirements.length === 0 && (
+                  <p>
+                    Not enough requirements extracted. Open the original posting
+                    to review it.
+                  </p>
+                )}
                 {selected.requirements.map((r) => (
                   <div
                     className={`requirement ${r.status === "met" ? "met" : "missing"}`}
@@ -1453,7 +1491,10 @@ export default function Home() {
                     </span>
                     <div>
                       <div className="requirement-title">
-                        <strong>{r.text}</strong>
+                        <strong>
+                          {r.skill ? `${r.skill}: ` : ""}
+                          {r.text}
+                        </strong>
                         <span>{r.required ? "Required" : "Preferred"}</span>
                       </div>
                       {r.evidence ? (
@@ -1461,11 +1502,11 @@ export default function Home() {
                           <blockquote>“{r.evidence.quote}”</blockquote>
                           <small>
                             <ShieldCheck size={12} />
-                            Verified CV evidence · {r.tier}
+                            Exact CV passage · skill mentioned
                           </small>
                         </>
                       ) : (
-                        <p>No supporting passage found in your CV.</p>
+                        <p>Not verified in your CV.</p>
                       )}
                     </div>
                   </div>

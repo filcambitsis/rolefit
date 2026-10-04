@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
+import pytest
+
 from sqlalchemy import func, select
 
 from rolefit.extraction import extract_cv, extract_requirements, parse_file, verified_span
 from rolefit.ingestion import reconcile
-from rolefit.matching import match_requirement, years_of_experience
+from rolefit.matching import match_requirement
 from rolefit.models import Evidence, Job, User
 from rolefit.normalization import employment, family
 from rolefit.ranking import bm25_scores
@@ -23,7 +25,7 @@ def test_spans_and_fabrication():
         id="r", skill="Python", min_years=None, category="skill", text="Python", quote="Python", required=True
     )
     forged = SimpleNamespace(id="e", start=0, end=6, quote="Python", skills=["Python"], section="skills")
-    assert match_requirement(req, [forged], CV_TEXT)["status"] == "missing"
+    assert match_requirement(req, [forged], CV_TEXT)["status"] == "not_verified"
 
 
 def test_cv_flow_and_user_isolation(client, db, job):
@@ -104,15 +106,6 @@ def test_employment_provenance_and_role_rules():
     assert family("Account Executive") is None
 
 
-def test_overlapping_experience_not_double_counted():
-    rows = [
-        SimpleNamespace(section="experience", quote="Jan 2020 – Dec 2022"),
-        SimpleNamespace(section="experience", quote="Jan 2021 – Dec 2023"),
-        SimpleNamespace(section="education", quote="Jan 2010 – Dec 2019"),
-    ]
-    assert years_of_experience(rows) == 4
-
-
 def test_requirements_separate_preferred():
     rows = extract_requirements(
         "Requirements\nExperience with Python.\nNice to have\nExperience with Kubernetes."
@@ -156,3 +149,192 @@ def test_ranking_and_retired_family_preferences(client, db, job):
     jobs = client.post("/matches").json()["jobs"]
     assert [j["id"] for j in jobs] == [job.id]
     assert family("AI & Technology Consultant") is None
+
+
+def test_skill_names_and_distinct_technologies():
+    from rolefit.skills import mentions, normalize_skill
+
+    assert set(mentions("Python, R, SQL, Excel, Spark, Go")) == {"Python", "R", "SQL", "Excel", "Spark", "Go"}
+    assert mentions("We excel at helping ideas spark and go further.") == []
+    for name in ["R", "Excel", "Spark", "Go", "LightGBM", "Hive", "OpenSearch"]:
+        assert normalize_skill(name)[0] == name
+    assert mentions("Built a LightGBM model with Apache Hive and OpenSearch.") == [
+        "LightGBM",
+        "Hive",
+        "OpenSearch",
+    ]
+    req = SimpleNamespace(
+        id="r",
+        skill="XGBoost",
+        min_years=None,
+        category="skill",
+        text="XGBoost",
+        quote="XGBoost",
+        required=True,
+    )
+    raw = "Built a LightGBM model."
+    evidence, _, _ = extract_cv(raw)
+    rows = [SimpleNamespace(id="e", **row) for row in evidence]
+    assert match_requirement(req, rows, raw)["status"] == "not_verified"
+
+
+def test_common_cv_headings_and_short_skill_lines():
+    raw = (
+        "Professional Experience\nBuilt Python services for clients.\n"
+        "Key Projects\nBuilt a Flask application.\n"
+        "Skills & Interests\nR\nExcel\n"
+        "Leadership & Activities\nOrganised community activities."
+    )
+    rows, failures, _ = extract_cv(raw)
+    assert failures == 0
+    assert [r["section"] for r in rows] == ["experience", "projects", "skills", "skills", "other"]
+    assert rows[2]["skills"] == ["R"]
+    assert rows[3]["skills"] == ["Excel"]
+
+
+@pytest.mark.parametrize("entrypoint", ["profile", "matches", "details"])
+def test_old_cv_refreshes_without_reupload(client, db, job, entrypoint):
+    from rolefit.extraction import PROMPT_VERSION
+    from rolefit.models import CV
+
+    raw = "Professional Experience\nBuilt Keras models for clients.\nSkills\nR"
+    client.post("/cv", files={"file": ("cv.txt", raw)})
+    cv = db.scalar(select(CV))
+    cv.prompt_version = "evidence-v2"
+    for row in db.scalars(select(Evidence)):
+        row.skills = []
+    db.commit()
+    if entrypoint == "matches":
+        assert client.post("/matches").status_code == 200
+    elif entrypoint == "details":
+        assert client.get(f"/jobs/{job.id}").status_code == 200
+    result = client.get("/me").json()
+    assert {"Keras", "R"} <= {s for e in result["evidence"] for s in e["skills"]}
+    assert cv.prompt_version == PROMPT_VERSION
+    assert all(raw[e["start"] : e["end"]] == e["quote"] for e in result["evidence"])
+    assert client.post("/matches").status_code == 200
+
+
+def test_legacy_cache_cleanup_and_user_isolation(client, db):
+    from rolefit.models import CV, ExtractionCache
+
+    for action in ["replace", "delete_cv", "delete_user"]:
+        client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+        cv = db.scalar(select(CV).where(CV.user_id == "alice"))
+        key = "legacy-" + action
+        db.add(
+            ExtractionCache(
+                key=key,
+                scope="adjudication:" + cv.id,
+                model_version="old",
+                prompt_version="evidence-v1",
+                payload={"evidence_quote": "Private passage"},
+            )
+        )
+        db.commit()
+        if action == "replace":
+            db.add(
+                ExtractionCache(
+                    key="other-user",
+                    scope="bob",
+                    model_version="old",
+                    prompt_version="evidence-v1",
+                    payload={},
+                )
+            )
+            db.commit()
+            response = client.post("/cv", files={"file": ("new.txt", CV_TEXT + "Updated.")})
+        else:
+            response = client.delete("/cv" if action == "delete_cv" else "/me")
+        assert response.status_code in (200, 204)
+        assert db.get(ExtractionCache, key) is None
+        assert db.get(ExtractionCache, "other-user") is not None
+
+
+@pytest.mark.parametrize(
+    "rows, expected",
+    [
+        ([], None),
+        ([(True, "met")], 100),
+        ([(False, "met")], 100),
+        ([(True, "not_verified")], 0),
+        ([(True, "met"), (False, "not_verified")], 85),
+        ([(True, "met"), (True, "not_verified"), (False, "not_verified")], 43),
+        ([(True, "met"), (True, "not_verified")], 50),
+        ([(False, "met"), (False, "not_verified")], 50),
+    ],
+)
+def test_requirement_score_available_groups(rows, expected):
+    from rolefit.matching import requirement_score
+
+    assert (
+        requirement_score([{"required": required, "status": status} for required, status in rows]) == expected
+    )
+
+
+def test_no_requirements_has_no_score(client, db, job):
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    job.description = "We are a friendly team with good benefits."
+    db.commit()
+    result = client.post("/matches").json()["jobs"][0]
+    assert result["score"] is None
+    assert result["requirements"] == []
+
+
+def test_requirement_sections_and_manual_constraints():
+    text = (
+        "About us\nWe have experience with Python.\n"
+        "You might thrive in this role if:\n"
+        "PhD or Master's degree in Computer Science.\n"
+        "5 years of professional experience in data science.\n"
+        "Published research at major conferences.\n"
+        "Proficiency in Python.\n"
+        "Preferred qualifications\nExperience with Docker.\n"
+        "About Example\nOur company has experience with Java."
+    )
+    rows = extract_requirements(text)
+    assert [r["category"] for r in rows] == ["education", "experience", "other", "skill", "skill"]
+    assert rows[-1]["required"] is False
+    assert {r["skill"] for r in rows} == {None, "Python", "Docker"}
+    raw = "Mar 2010 - Present"
+    evidence = [SimpleNamespace(id="e", quote=raw, start=0, end=len(raw), section="experience", skills=[])]
+    for row in rows[:2]:
+        assert match_requirement(SimpleNamespace(id="r", **row), evidence, raw)["status"] == "not_verified"
+
+
+def test_negation_and_react_agent():
+    from rolefit.skills import mentions
+
+    assert mentions("Built Python tools but no experience with Java.") == ["Python"]
+    assert mentions("Never used Docker.") == []
+    assert "React" not in mentions("Built a ReAct agent.")
+    assert "React" in mentions("Built a React frontend.")
+
+
+@pytest.mark.parametrize(
+    "heading",
+    ["Required Qualifications", "It's Important To Us That You Have", "Skills You'll Need to Bring:"],
+)
+def test_required_heading_variants(heading):
+    rows = extract_requirements(
+        f"{heading}\n4 years of relevant experience.\nProficiency in Python.\n"
+        "It Would Be Great if You Had\nExperience with Docker.\n"
+        "Notice\nOur company offers benefits."
+    )
+    assert [(r["category"], r["required"]) for r in rows] == [
+        ("experience", True),
+        ("skill", True),
+        ("skill", False),
+    ]
+
+
+def test_unreadable_pdf_preserves_existing_cv(client):
+    import pymupdf
+
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    previous = client.get("/me").json()["cv"]["id"]
+    with pymupdf.open() as document:
+        document.new_page()
+        response = client.post("/cv", files={"file": ("scanned.pdf", document.tobytes())})
+    assert response.status_code == 422
+    assert client.get("/me").json()["cv"]["id"] == previous

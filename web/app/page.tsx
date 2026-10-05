@@ -40,6 +40,36 @@ import { demoMode, request, supabase } from "../lib/api";
 
 type View = "matches" | "profile" | "preferences" | "saved";
 
+function descriptionParagraphs(text: string): string[] {
+  // Keep source line breaks, joining short fragments introduced by inline links.
+  const paragraphs: string[] = [];
+  for (const line of text
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)) {
+    const previous = paragraphs.at(-1);
+    if (
+      previous &&
+      !/[.!?:]$/.test(previous) &&
+      (line.length < 50 || previous.length < 5)
+    ) {
+      paragraphs[paragraphs.length - 1] += ` ${line}`;
+    } else {
+      paragraphs.push(line);
+    }
+  }
+  // Some feeds supply a single long block; break it at sentence boundaries.
+  return paragraphs.flatMap((paragraph) => {
+    if (paragraph.length < 700) return [paragraph];
+    const sentences = paragraph.split(/(?<=[.!?])\s+(?=[A-Z])/);
+    const chunks: string[] = [];
+    for (let i = 0; i < sentences.length; i += 3) {
+      chunks.push(sentences.slice(i, i + 3).join(" "));
+    }
+    return chunks;
+  });
+}
+
 function Score({
   score,
   large = false,
@@ -646,9 +676,11 @@ export default function Home() {
                                   ? "Employment not specified"
                                   : job.employment}
                               </span>
-                              <span className="workplace-tag">
-                                {job.workplace}
-                              </span>
+                              {job.workplace && job.workplace !== "unknown" && (
+                                <span className="workplace-tag">
+                                  {job.workplace}
+                                </span>
+                              )}
                             </div>
                             <div className="job-skills">
                               {job.requirements
@@ -1165,7 +1197,9 @@ export default function Home() {
                     ? "Employment not specified"
                     : selected.employment}
                 </span>
-                <span>{selected.workplace}</span>
+                {selected.workplace && selected.workplace !== "unknown" && (
+                  <span>{selected.workplace}</span>
+                )}
               </div>
               <div className="detail-score">
                 <Score score={selected.score} large />
@@ -1240,14 +1274,17 @@ export default function Home() {
               {selected.description && (
                 <div className="job-description">
                   <h2>About this role</h2>
-                  <p>{selected.description}</p>
+                  {descriptionParagraphs(selected.description).map(
+                    (paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ),
+                  )}
                 </div>
               )}
               <div className="detail-provenance">
                 <ShieldCheck size={16} />
                 <span>
-                  Employment type: {selected.employment_provenance}. Every match
-                  is linked to a verified CV passage.
+                  Matched requirements link to exact passages from your CV.
                 </span>
               </div>
             </div>

@@ -1167,7 +1167,8 @@ textarea::placeholder {
   color: #607690;
 }
 .job-description p {
-  white-space: pre-line;
+  margin: 0 0 16px;
+  white-space: normal;
   font-size: 12px;
   line-height: 1.9;
   color: #8e9eb3;

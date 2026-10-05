@@ -117,4 +117,4 @@ Local development authentication is restricted to loopback requests and localhos
 - **No jobs:** run `make refresh`, then check preferences and include unspecified employment if appropriate.
 - **Switch demo/connected mode:** restart the frontend using the corresponding Makefile command.
 
-MIT licensed. [Archived research plans](archive/README.md) are historical proposals, not completed experiments.
+MIT licensed.

@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import {
   cleanPreferences,
-  careerLevel,
+  matchesCareerLevel,
   careerLevels,
   defaults,
   demoJobs,
@@ -358,8 +358,7 @@ export default function Home() {
       j.countries.includes("NL") &&
       prefs.employment.includes(j.employment) &&
       (prefs.workplace === "any" || j.workplace === prefs.workplace) &&
-      (!prefs.career_levels.length ||
-        prefs.career_levels.includes(careerLevel(j.title, j.employment))) &&
+      matchesCareerLevel(j, prefs.career_levels) &&
       (!prefs.search ||
         `${j.title} ${j.company}`
           .toLowerCase()
@@ -984,7 +983,8 @@ export default function Home() {
                         <p>
                           Estimated from job titles. Leave all unselected to
                           include every level. “Not specified” includes titles
-                          without a clear level.
+                          without a clear level. Internships are controlled
+                          separately under employment type.
                         </p>
                         <div className="choice-chips">
                           {careerLevels.map(([value, label]) => (

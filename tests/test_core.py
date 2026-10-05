@@ -439,3 +439,24 @@ def test_career_and_workplace_filters(client, job, db):
     client.put("/preferences", json={"workplace": "remote"})
     assert client.post("/matches").json()["jobs"] == []
     assert client.put("/preferences", json={"career_levels": ["invented"]}).status_code == 422
+
+
+@pytest.mark.parametrize(
+    "employment,expected", [(["internship"], 1), (["full-time", "internship"], 1), (["full-time"], 0)]
+)
+def test_internships_follow_employment_not_career_level(client, job, db, employment, expected):
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    job.title = "Machine Learning Intern"
+    job.employment = "internship"
+    db.commit()
+    assert (
+        client.put("/preferences", json={"career_levels": ["junior"], "employment": employment}).status_code
+        == 200
+    )
+    assert len(client.post("/matches").json()["jobs"]) == expected
+
+
+def test_legacy_internship_level_is_removed(client):
+    response = client.put("/preferences", json={"career_levels": ["internship", "junior"]})
+    assert response.status_code == 200
+    assert response.json()["career_levels"] == ["junior"]

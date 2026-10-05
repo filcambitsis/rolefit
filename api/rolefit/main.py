@@ -84,7 +84,12 @@ def candidates(db, prefs):
         query = query.where(Job.workplace == prefs.workplace)
     jobs = list(db.scalars(query))
     if prefs.career_levels:
-        jobs = [job for job in jobs if career_level(job.title, job.employment) in prefs.career_levels]
+        jobs = [
+            job
+            for job in jobs
+            if job.employment == "internship"
+            or career_level(job.title, job.employment) in prefs.career_levels
+        ]
     # Netherlands-only, including remote roles explicitly available here.
     return [job for job in jobs if "NL" in job.countries]
 

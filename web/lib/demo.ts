@@ -51,7 +51,6 @@ export const families = [
   "Software Engineer",
 ];
 export const careerLevels = [
-  ["internship", "Internship"],
   ["junior", "Junior / graduate"],
   ["mid", "Mid-level"],
   ["senior", "Senior"],
@@ -67,6 +66,16 @@ export function careerLevel(title: string, employment: string): string {
   if (/\b(?:junior|jr|graduate|entry[ -]level)\b/i.test(title)) return "junior";
   if (/\b(?:mid[ -]level|medior|intermediate)\b/i.test(title)) return "mid";
   return "unknown";
+}
+export function matchesCareerLevel(
+  job: Pick<Job, "title" | "employment">,
+  levels: string[],
+): boolean {
+  return (
+    !levels.length ||
+    job.employment === "internship" ||
+    levels.includes(careerLevel(job.title, job.employment))
+  );
 }
 export const defaults: Preferences = {
   families: [],

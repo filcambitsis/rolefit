@@ -55,3 +55,24 @@ for (const [title, employment, expected] of [
   assert.equal(mod.exports.careerLevel(title, employment), expected);
 assert.ok(demoJobs([]).some((job) => job.family === "Software Engineer"));
 assert.ok(demoJobs([]).some((job) => job.family === "Data Engineer"));
+
+assert.equal(
+  mod.exports.matchesCareerLevel(
+    { title: "ML Intern", employment: "internship" },
+    ["junior"],
+  ),
+  true,
+);
+assert.equal(
+  mod.exports.matchesCareerLevel(
+    { title: "Senior Engineer", employment: "full-time" },
+    ["junior"],
+  ),
+  false,
+);
+assert.deepEqual(
+  mod.exports.cleanPreferences({ career_levels: ["internship", "junior"] })
+    .career_levels,
+  ["junior"],
+);
+assert.ok(!mod.exports.careerLevels.some(([value]) => value === "internship"));

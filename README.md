@@ -138,3 +138,5 @@ MIT licensed. Earlier research plans are preserved in [docs/archive](docs/archiv
 RoleFit collects English-language AI, data and software listings from Eye Security, DataSnipper, IMC and TomTom. Remote roles must explicitly list the Netherlands as an allowed location. There are no country or city controls, LinkedIn/Indeed integrations, or pasted-job inputs. Unknown employment types remain excluded rather than guessed. Availability depends on current employer postings.
 
 Career-level filters use explicit job-title cues (or internship employment type), not CV-based eligibility judgments. Unmarked titles are “Not specified”; junior/mid/senior levels are not guessed from missing information. The CV page offers a collapsed preview of extracted passages, with exact supporting quotes still available in job details.
+
+Internship appears only under employment type. Career-level selections apply to regular jobs; an included internship is not excluded by a junior/senior selection.

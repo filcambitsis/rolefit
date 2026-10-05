@@ -15,7 +15,7 @@
 }
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 body {
   margin: 0;
@@ -92,8 +92,7 @@ a {
   transition:
     background 0.18s,
     color 0.18s,
-    border-color 0.18s,
-    transform 0.18s;
+    border-color 0.18s;
 }
 ::selection {
   background: #dce3ff;
@@ -291,7 +290,6 @@ h1 {
 }
 .primary:hover:not(:disabled) {
   background: var(--blue-dark);
-  transform: translateY(-1px);
 }
 .secondary {
   background: white;
@@ -438,10 +436,7 @@ h1 {
   border: 1px solid #e4e8f0;
   border-radius: 12px;
   padding: 23px 23px 0;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s,
-    transform 0.2s;
+  transition: border-color 0.15s;
 }
 .job-card:hover {
   border-color: #bfcdf9;
@@ -594,21 +589,6 @@ h1 {
   width: 43px;
   position: relative;
   flex-shrink: 0;
-}
-.score svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-  fill: none;
-  stroke-width: 4;
-}
-.score-track {
-  stroke: #e8eefb;
-}
-.score-fill {
-  stroke: #5376ed;
-  stroke-linecap: round;
-  animation: draw 1.3s ease both;
 }
 .score > span {
   position: absolute;
@@ -932,7 +912,6 @@ textarea::placeholder {
   z-index: 70;
   font-size: 12px;
   max-width: calc(100vw - 35px);
-  animation: toast-in 0.25s ease;
 }
 .toast > span {
   display: flex;
@@ -1001,8 +980,6 @@ textarea::placeholder {
   display: flex;
   justify-content: flex-end;
   background: #111b3c60;
-  backdrop-filter: blur(4px);
-  animation: fade 0.2s;
 }
 .detail-panel {
   background: #fff;
@@ -1011,7 +988,6 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   box-shadow: -10px 0 60px #14234522;
-  animation: slide-in 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
   outline: none;
 }
 .detail-topbar {
@@ -1279,51 +1255,13 @@ textarea::placeholder {
 .spin {
   animation: spin 1s linear infinite;
 }
-@keyframes draw {
-  from {
-    stroke-dasharray: 0 188.5;
-  }
-}
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes slide-in {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    bottom: 15px;
-  }
-  to {
-    opacity: 1;
-    bottom: 26px;
-  }
-}
+
 /* Increase primary reading sizes without changing the compact workspace rhythm. */
 .job-title {
   font-size: 17px;
@@ -1496,7 +1434,7 @@ textarea::placeholder {
   .sidebar {
     transform: translateX(-100%);
     visibility: hidden;
-    transition: transform 0.25s;
+
     width: 238px;
   }
   .sidebar-open {
@@ -1868,4 +1806,52 @@ textarea::placeholder {
 .page-heading h1 {
   font-size: 28px;
   letter-spacing: -0.6px;
+}
+
+/* Plain scores and compact controls keep the focus on the job details. */
+.score,
+.score-large {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #f7f8fa;
+}
+.score-large {
+  width: 70px;
+  height: 50px;
+}
+.score-large > span {
+  flex-direction: row;
+  font-size: 22px;
+}
+.score-large small {
+  font-size: 12px;
+  margin: 0 0 0 2px;
+}
+.detail-score {
+  background: #fafafa;
+  border-radius: 4px;
+  padding: 16px;
+}
+.detail-score .eyebrow {
+  display: none;
+}
+.detail-score p {
+  font-size: 12px;
+  color: #64758e;
+}
+.role-options {
+  gap: 8px;
+}
+.role-options > button {
+  padding: 12px;
+  border-radius: 4px;
+}
+.preference-section {
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+}
+.primary,
+.detail-panel,
+.toast {
+  box-shadow: none;
 }

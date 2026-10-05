@@ -140,3 +140,7 @@ RoleFit collects English-language AI, data and software listings from Eye Securi
 Career-level filters use explicit job-title cues (or internship employment type), not CV-based eligibility judgments. Unmarked titles are “Not specified”; junior/mid/senior levels are not guessed from missing information. The CV page offers a collapsed preview of extracted passages, with exact supporting quotes still available in job details.
 
 Internship appears only under employment type. Career-level selections apply to regular jobs; an included internship is not excluded by a junior/senior selection.
+
+Role filters also include AI Consultant, Data Consultant and Technology Consultant. Available results depend on the employer boards; selecting a role does not guarantee vacancies.
+
+Matching is conservative: basic skill mentions can count, but advanced proficiency, production experience and either/or requirements remain unverified for manual review. Future learning intentions do not count as skills. The coverage percentage is a heuristic over extracted requirements, not a validated fit prediction.

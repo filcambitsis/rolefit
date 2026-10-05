@@ -148,7 +148,7 @@ def test_ranking_and_retired_family_preferences(client, db, job):
     db.commit()
     jobs = client.post("/matches").json()["jobs"]
     assert [j["id"] for j in jobs] == [job.id]
-    assert family("AI & Technology Consultant") is None
+    assert family("AI & Technology Consultant") == "AI Consultant"
 
 
 def test_skill_names_and_distinct_technologies():
@@ -460,3 +460,56 @@ def test_legacy_internship_level_is_removed(client):
     response = client.put("/preferences", json={"career_levels": ["internship", "junior"]})
     assert response.status_code == 200
     assert response.json()["career_levels"] == ["junior"]
+
+
+@pytest.mark.parametrize(
+    "title,expected",
+    [
+        ("AI & Technology Consultant", "AI Consultant"),
+        ("Senior Data Analytics Consultant", "Data Consultant"),
+        ("Digital Transformation Consultant", "Technology Consultant"),
+        ("Machine Learning Advisor", "AI Consultant"),
+        ("Recruitment Consultant", None),
+    ],
+)
+def test_consulting_families(title, expected):
+    assert family(title) == expected
+
+
+@pytest.mark.parametrize(
+    "requirement",
+    [
+        "Advanced Python expertise",
+        "Production experience with Python",
+        "Strong proficiency in Python",
+        "Python or Java experience",
+    ],
+)
+def test_skill_mentions_do_not_prove_qualified_requirements(requirement):
+    raw = "Skills: Python, Java"
+    row = SimpleNamespace(id="e", **extract_cv(raw)[0][0])
+    req = SimpleNamespace(
+        id="r", skill="Python", min_years=None, category="skill", text=requirement, required=True
+    )
+    assert match_requirement(req, [row], raw)["status"] == "not_verified"
+
+
+@pytest.mark.parametrize("raw", ["I plan to learn Python", "I do not know Python"])
+def test_old_evidence_skill_tags_cannot_override_negative_text(raw):
+    row = SimpleNamespace(id="e", quote=raw, start=0, end=len(raw), section="skills", skills=["Python"])
+    req = SimpleNamespace(
+        id="r", skill="Python", min_years=None, category="skill", text="Python", required=True
+    )
+    assert match_requirement(req, [row], raw)["status"] == "not_verified"
+
+
+def test_alternative_skills_remain_one_requirement():
+    rows = extract_requirements("Requirements\nExperience with Python or Java.")
+    assert len(rows) == 1
+    assert rows[0]["skill"] is None
+
+
+def test_all_role_preferences_are_accepted(client):
+    from rolefit.normalization import FAMILIES
+
+    assert client.put("/preferences", json={"families": FAMILIES}).status_code == 200

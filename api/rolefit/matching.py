@@ -1,3 +1,20 @@
+import re
+
+from .skills import mentions
+
+
+def needs_manual_review(text):
+    # A matching keyword cannot prove depth, scale or responsibility.
+    return bool(
+        re.search(
+            r"\b(?:advanced|expert|expertise|proficien\w*|fluent|fluency|extensive|strong|deep|"
+            r"production|commercial|professional|at scale|leading|leadership|architect\w*)\b",
+            text,
+            re.I,
+        )
+    )
+
+
 def evidence_dict(row):
     return {k: getattr(row, k) for k in ["id", "quote", "start", "end", "section", "skills"]}
 
@@ -25,12 +42,16 @@ def match_requirement(req, evidence, raw):
             (
                 e
                 for e in sorted(valid, key=lambda e: e.section not in ("experience", "projects"))
-                if req.skill in e.skills
+                if req.skill in mentions(e.quote)
             ),
             None,
         )
         tier = "vocabulary"
-        if req.min_years:
+        if (
+            req.min_years
+            or needs_manual_review(req.text)
+            or (re.search(r"\bor\b", req.text, re.I) and len(mentions(req.text)) > 1)
+        ):
             found = None
             tier = "manual_review"
     elif req.category in ("experience", "education"):

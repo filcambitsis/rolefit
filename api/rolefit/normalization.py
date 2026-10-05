@@ -13,6 +13,9 @@ FAMILIES = [
     "Data Analyst",
     "Data Engineer",
     "Software Engineer",
+    "AI Consultant",
+    "Data Consultant",
+    "Technology Consultant",
 ]
 
 
@@ -30,6 +33,13 @@ def content_hash(text: str) -> str:
 def family(title: str) -> str | None:
     """Role family from the job title, or None if the job is out of scope."""
     value = title.lower()
+    if re.search(r"\b(?:consultant|consulting|advisor)\b", value):
+        if re.search(r"\bai\b|artificial intelligence|machine learning|generative", value):
+            return "AI Consultant"
+        if re.search(r"\bdata\b|analytics|business intelligence", value):
+            return "Data Consultant"
+        if re.search(r"technology|technical|digital|\bit\b|solutions?", value):
+            return "Technology Consultant"
     if re.search(r"data scien|research scien|applied scien", value):
         return FAMILIES[2]
     if re.search(

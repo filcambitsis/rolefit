@@ -39,7 +39,9 @@ def mentions(text):
         for clause in clauses
         if not re.search(
             r"\b(no experience|not experienced|never used|not proficient|unfamiliar with|"
-            r"no knowledge|without experience|not familiar|haven.t used|have not used)\b",
+            r"no knowledge|without experience|not familiar|haven.t used|have not used|"
+            r"plan to learn|planning to learn|want to learn|interested in learning|"
+            r"no proficiency|not skilled|do not know|don.t know)\b",
             clause,
             re.I,
         )

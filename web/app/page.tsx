@@ -57,19 +57,9 @@ function Score({
           : `${score}% requirement coverage`
       }
     >
-      <svg viewBox="0 0 72 72">
-        <circle className="score-track" cx="36" cy="36" r="30" />
-        <circle
-          className="score-fill"
-          cx="36"
-          cy="36"
-          r="30"
-          strokeDasharray={`${(score ?? 0) * 1.885} 188.5`}
-        />
-      </svg>
       <span>
         {score ?? "—"}
-        <small>{score === null ? "N/A" : large ? "OUT OF 100" : "%"}</small>
+        <small>{score === null ? "N/A" : "%"}</small>
       </span>
     </div>
   );
@@ -84,7 +74,6 @@ function CompanyMark({
   return (
     <div className={`company-mark mark-${index % 5}`} aria-hidden="true">
       {company.slice(0, 1)}
-      {index % 3 === 0 && <span>✳</span>}
     </div>
   );
 }
@@ -1190,9 +1179,9 @@ export default function Home() {
               <p className="breakdown-intro">
                 Supported means a CV passage matches our checks. “Not verified
                 in your CV” means no supporting passage was found, not that you
-                lack the skill. Skill matches confirm a mention, not proficiency
-                or every condition in the sentence. Degree and experience
-                requirements need your review.
+                lack the skill. Basic skill matches confirm a mention only.
+                Advanced proficiency, production experience, qualifications and
+                alternative requirements need your review.
               </p>
               <div className="requirements">
                 {selected.requirements.length === 0 && (

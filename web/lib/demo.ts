@@ -49,6 +49,9 @@ export const families = [
   "Data Analyst",
   "Data Engineer",
   "Software Engineer",
+  "AI Consultant",
+  "Data Consultant",
+  "Technology Consultant",
 ];
 export const careerLevels = [
   ["junior", "Junior / graduate"],

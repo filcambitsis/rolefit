@@ -16,7 +16,7 @@ from .skills import mentions, normalize_skill
 
 # Bump this when extraction rules or the skills vocabulary change:
 # stored requirements with an older version are extracted again.
-PROMPT_VERSION = "evidence-v7"
+PROMPT_VERSION = "evidence-v8"
 MAX_TEXT = 150_000
 
 
@@ -291,7 +291,11 @@ def extract_requirements(raw, db=None, use_llm=False):
                 )
             else:
                 skills = mentions(line)
-                if skills:
+                if skills and re.search(r"\bor\b", line, re.I):
+                    candidates.append(
+                        {"quote": line, "category": "other", "skill": None, "required": required}
+                    )
+                elif skills:
                     candidates.extend(
                         {"quote": line, "category": "skill", "skill": skill, "required": required}
                         for skill in skills

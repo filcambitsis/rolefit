@@ -10,7 +10,6 @@ import {
   BriefcaseBusiness,
   Check,
   ChevronDown,
-  ChevronRight,
   Compass,
   FileText,
   Loader2,
@@ -352,7 +351,7 @@ export default function Home() {
         `${j.title} ${j.company}`
           .toLowerCase()
           .includes(prefs.search.toLowerCase())) &&
-      (tab !== "strong" || j.required_coverage >= 0.8),
+      (tab !== "strong" || (j.score !== null && j.score >= 80)),
   );
   filtered.sort((a, b) =>
     sort === "newest"
@@ -441,8 +440,6 @@ export default function Home() {
             >
               <Menu size={22} />
             </button>
-            <span>Workspace</span>
-            <ChevronRight size={14} />
             <strong>
               {
                 {
@@ -548,7 +545,7 @@ export default function Home() {
                             className={tab === "strong" ? "selected" : ""}
                             onClick={() => setTab("strong")}
                           >
-                            High coverage <Sparkles size={14} />
+                            80%+ coverage
                           </button>
                         </div>
                         <label className="sort-label">
@@ -733,32 +730,46 @@ export default function Home() {
                             {view === "saved"
                               ? "No saved jobs yet."
                               : evidence.length
-                                ? "No roles match these filters."
+                                ? tab === "strong"
+                                  ? "No matches at 80% or above."
+                                  : "No roles match these filters."
                                 : "Upload a CV to get started."}
                           </h2>
                           <p>
                             {view === "saved"
                               ? "Save a role to keep it within reach."
                               : evidence.length
-                                ? "No Dutch jobs match these filters. Try including full-time roles, a different role family, or clearing your search."
+                                ? tab === "strong"
+                                  ? "Try all matches to see jobs with lower coverage."
+                                  : "Try fewer filters or clear your search."
                                 : "Add your CV to turn your experience into job matches."}
                           </p>
                           <button
                             className="button primary"
-                            onClick={() =>
+                            onClick={() => {
+                              if (
+                                view !== "saved" &&
+                                evidence.length &&
+                                tab === "strong"
+                              ) {
+                                setTab("all");
+                                return;
+                              }
                               navigate(
                                 view === "saved"
                                   ? "matches"
                                   : evidence.length
                                     ? "preferences"
                                     : "profile",
-                              )
-                            }
+                              );
+                            }}
                           >
                             {view === "saved"
                               ? "Find jobs"
                               : evidence.length
-                                ? "Edit preferences"
+                                ? tab === "strong"
+                                  ? "Show all matches"
+                                  : "Edit preferences"
                                 : "Add your CV"}
                             <ArrowRight size={16} />
                           </button>
@@ -1152,17 +1163,14 @@ export default function Home() {
               <div className="detail-score">
                 <Score score={selected.score} large />
                 <div>
-                  <span className="eyebrow">REQUIREMENT COVERAGE</span>
                   <h2>
                     {selected.score === null
                       ? "Not enough requirements extracted"
-                      : `${selected.score}% requirement coverage`}
+                      : "Requirement coverage"}
                   </h2>
                   <p>
-                    Coverage measures support for extracted requirements only.
-                    Required items carry 85% and preferred items 15%; a sole
-                    group carries 100%. It is not a hiring probability. A high
-                    score based on few requirements can be misleading.
+                    How much your CV supports the listed requirements—not your
+                    chance of getting hired.
                   </p>
                 </div>
               </div>
@@ -1177,11 +1185,8 @@ export default function Home() {
                 </span>
               </div>
               <p className="breakdown-intro">
-                Supported means a CV passage matches our checks. “Not verified
-                in your CV” means no supporting passage was found, not that you
-                lack the skill. Basic skill matches confirm a mention only.
-                Advanced proficiency, production experience, qualifications and
-                alternative requirements need your review.
+                Matched items link to your CV. “Not verified” means you should
+                check the requirement yourself.
               </p>
               <div className="requirements">
                 {selected.requirements.length === 0 && (

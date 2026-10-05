@@ -31,6 +31,19 @@ export async function request<T>(
     const body = await res
       .json()
       .catch(() => ({ detail: "Could not reach RoleFit. Please try again." }));
+    if (res.status === 422 && Array.isArray(body.detail)) {
+      const fields = body.detail.map(
+        (item: { loc?: string[] }) => item.loc?.[1],
+      );
+      if (path === "/preferences" && fields.includes("families")) {
+        throw new Error(
+          "The server rejected these role types. Restart the API with make run-api, then try again.",
+        );
+      }
+      throw new Error(
+        "Could not save your choices. Check your preferences and try again.",
+      );
+    }
     throw new Error(
       typeof body.detail === "string"
         ? body.detail

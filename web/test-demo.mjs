@@ -44,3 +44,14 @@ assert.equal(
   "countries" in mod.exports.cleanPreferences({ countries: ["US"] }),
   false,
 );
+for (const [title, employment, expected] of [
+  ["Software Engineer", "full-time", "unknown"],
+  ["Junior Developer", "full-time", "junior"],
+  ["Senior ML Engineer", "full-time", "senior"],
+  ["Staff Data Engineer", "full-time", "lead"],
+  ["Medior Software Engineer", "full-time", "mid"],
+  ["Research Engineer", "internship", "internship"],
+])
+  assert.equal(mod.exports.careerLevel(title, employment), expected);
+assert.ok(demoJobs([]).some((job) => job.family === "Software Engineer"));
+assert.ok(demoJobs([]).some((job) => job.family === "Data Engineer"));

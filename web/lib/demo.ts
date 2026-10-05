@@ -39,6 +39,7 @@ export type Preferences = {
   families: string[];
   employment: string[];
   workplace: string;
+  career_levels: string[];
   search: string;
 };
 export const families = [
@@ -46,11 +47,32 @@ export const families = [
   "ML Engineer",
   "Data Scientist",
   "Data Analyst",
+  "Data Engineer",
+  "Software Engineer",
 ];
+export const careerLevels = [
+  ["internship", "Internship"],
+  ["junior", "Junior / graduate"],
+  ["mid", "Mid-level"],
+  ["senior", "Senior"],
+  ["lead", "Lead / management"],
+  ["unknown", "Not specified"],
+];
+export function careerLevel(title: string, employment: string): string {
+  if (employment === "internship" || /\bintern(?:ship)?\b/i.test(title))
+    return "internship";
+  if (/\b(?:lead|staff|principal|manager|head|director)\b/i.test(title))
+    return "lead";
+  if (/\b(?:senior|sr)\b/i.test(title)) return "senior";
+  if (/\b(?:junior|jr|graduate|entry[ -]level)\b/i.test(title)) return "junior";
+  if (/\b(?:mid[ -]level|medior|intermediate)\b/i.test(title)) return "mid";
+  return "unknown";
+}
 export const defaults: Preferences = {
   families: [],
   employment: ["full-time", "part-time", "internship"],
   workplace: "any",
+  career_levels: [],
   search: "",
 };
 // Fill in missing fields and drop role families that no longer exist,
@@ -60,6 +82,9 @@ export function cleanPreferences(saved: Partial<Preferences>): Preferences {
     ...defaults,
     employment: saved.employment ?? defaults.employment,
     workplace: saved.workplace ?? defaults.workplace,
+    career_levels: (saved.career_levels ?? []).filter((level) =>
+      careerLevels.some(([value]) => value === level),
+    ),
     search: saved.search ?? defaults.search,
     families: (saved.families ?? []).filter((f) => families.includes(f)),
   };
@@ -185,6 +210,26 @@ const templates = [
     "hybrid",
     ["Python", "PyTorch", "Computer vision"],
     ["Docker", "AWS"],
+  ],
+  [
+    "Harbour",
+    "Junior Software Engineer",
+    "Rotterdam, Netherlands",
+    "NL",
+    "Software Engineer",
+    "hybrid",
+    ["Python", "SQL"],
+    ["Docker"],
+  ],
+  [
+    "Canal",
+    "Senior Data Engineer",
+    "Amsterdam, Netherlands",
+    "NL",
+    "Data Engineer",
+    "remote",
+    ["Python", "SQL", "AWS"],
+    ["Spark"],
   ],
 ] as const;
 export function demoJobs(evidence: Evidence[]): Job[] {

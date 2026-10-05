@@ -387,3 +387,55 @@ def test_dutch_feed_requirement_headings(heading):
     assert any(row["skill"] == "Python" and row["required"] for row in rows)
     assert any(row["skill"] == "Docker" and not row["required"] for row in rows)
     assert not any(row["skill"] in {"SQL", "Kubernetes"} for row in rows)
+
+
+@pytest.mark.parametrize(
+    "title,expected",
+    [
+        ("Junior Software Engineer", "Software Engineer"),
+        ("Senior Data Engineer", "Data Engineer"),
+        ("Frontend Developer", "Software Engineer"),
+        ("AI Software Engineer", "AI Engineer"),
+        ("Account Executive", None),
+    ],
+)
+def test_expanded_role_types(title, expected):
+    assert family(title) == expected
+
+
+@pytest.mark.parametrize(
+    "title,employment,expected",
+    [
+        ("Software Engineer", "full-time", "unknown"),
+        ("Junior Developer", "full-time", "junior"),
+        ("Senior ML Engineer", "full-time", "senior"),
+        ("Staff Data Engineer", "full-time", "lead"),
+        ("Medior Software Engineer", "full-time", "mid"),
+        ("Research Engineer", "internship", "internship"),
+    ],
+)
+def test_career_level_is_conservative(title, employment, expected):
+    from rolefit.normalization import career_level
+
+    assert career_level(title, employment) == expected
+
+
+def test_career_and_workplace_filters(client, job, db):
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    job.title = "Junior Software Engineer"
+    job.family = "Software Engineer"
+    job.workplace = "hybrid"
+    db.commit()
+    for prefs, count in [
+        ({"families": ["Software Engineer"], "career_levels": ["junior"], "workplace": "hybrid"}, 1),
+        ({"career_levels": ["senior"]}, 0),
+        ({"workplace": "remote"}, 0),
+        ({}, 1),
+    ]:
+        assert client.put("/preferences", json=prefs).status_code == 200
+        assert len(client.post("/matches").json()["jobs"]) == count
+    job.workplace = "unknown"
+    db.commit()
+    client.put("/preferences", json={"workplace": "remote"})
+    assert client.post("/matches").json()["jobs"] == []
+    assert client.put("/preferences", json={"career_levels": ["invented"]}).status_code == 422

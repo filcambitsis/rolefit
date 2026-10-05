@@ -11,7 +11,7 @@
 
 ## CV bullet
 
-Built RoleFit, a full-stack app matching CVs to AI and data jobs in the Netherlands using FastAPI, Next.js and SQLAlchemy, integrating three public job-board providers and explainable requirement coverage linked to exact CV passages.
+Built RoleFit, a full-stack app matching CVs to AI, data and software jobs in the Netherlands using FastAPI, Next.js and SQLAlchemy, integrating three public job-board providers and explainable requirement coverage linked to exact CV passages.
 
 ## Interview points
 

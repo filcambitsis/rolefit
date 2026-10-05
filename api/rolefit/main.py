@@ -12,7 +12,7 @@ from .db import get_db
 from .extraction import PROMPT_VERSION, extract_cv, extract_requirements, parse_file
 from .matching import coverage, evidence_dict, match_requirement, requirement_score
 from .models import CV, CrawlRun, Decision, Evidence, ExtractionCache, Job, Requirement, User
-from .normalization import FAMILIES
+from .normalization import FAMILIES, career_level
 from .ranking import bm25_scores
 from .schemas import DecisionInput, Preferences
 from .skills import mentions
@@ -80,7 +80,11 @@ def candidates(db, prefs):
     )
     if prefs.families:
         query = query.where(Job.family.in_(prefs.families))
+    if prefs.workplace != "any":
+        query = query.where(Job.workplace == prefs.workplace)
     jobs = list(db.scalars(query))
+    if prefs.career_levels:
+        jobs = [job for job in jobs if career_level(job.title, job.employment) in prefs.career_levels]
     # Netherlands-only, including remote roles explicitly available here.
     return [job for job in jobs if "NL" in job.countries]
 
@@ -121,6 +125,7 @@ def job_payload(db, job, cv, evidence):
         "location": job.location,
         "countries": job.countries,
         "family": job.family,
+        "career_level": career_level(job.title, job.employment),
         "employment": job.employment,
         "employment_provenance": job.employment_provenance,
         "workplace": job.workplace,

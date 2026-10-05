@@ -55,3 +55,7 @@ Ready for a local portfolio demonstration after the documented checks pass. Publ
 ## Netherlands-only update (5 October 2026)
 
 The API enforces Netherlands availability for matches, job details and saving. Legacy country preferences are ignored, and old foreign bookmarks are hidden. Tests cover foreign/unknown remote locations and multi-location Dutch jobs. The source list now contains Eye Security, DataSnipper, IMC and TomTom (Lever EU). Refresh yielded 11 eligible listings, all with extracted requirements after adding missing section-heading variants. Desktop (1440px) and mobile (390px) layouts, evidence, simplified preferences, saving and shortlist navigation were checked; screenshots were refreshed.
+
+## Practical preferences update
+
+Added Software Engineer and Data Engineer, conservative title-based career levels, and actual work-arrangement filtering. The refresh returned 22 eligible Dutch listings (4 without extracted requirements, displayed without scores). Backend regressions cover combined filters, unknown arrangements and invalid levels; demo checks cover the same title rules. The CV preview now opens on demand and does not label copied text as independently verified.

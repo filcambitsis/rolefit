@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import {
   cleanPreferences,
+  careerLevel,
+  careerLevels,
   defaults,
   demoJobs,
   Evidence,
@@ -337,7 +339,10 @@ export default function Home() {
       setError((e as Error).message);
     }
   }
-  function togglePreference(key: "families" | "employment", value: string) {
+  function togglePreference(
+    key: "families" | "employment" | "career_levels",
+    value: string,
+  ) {
     setPrefs({
       ...prefs,
       [key]: prefs[key].includes(value)
@@ -352,6 +357,9 @@ export default function Home() {
       (!prefs.families.length || prefs.families.includes(j.family)) &&
       j.countries.includes("NL") &&
       prefs.employment.includes(j.employment) &&
+      (prefs.workplace === "any" || j.workplace === prefs.workplace) &&
+      (!prefs.career_levels.length ||
+        prefs.career_levels.includes(careerLevel(j.title, j.employment))) &&
       (!prefs.search ||
         `${j.title} ${j.company}`
           .toLowerCase()
@@ -361,10 +369,7 @@ export default function Home() {
   filtered.sort((a, b) =>
     sort === "newest"
       ? b.first_seen.localeCompare(a.first_seen)
-      : (prefs.workplace !== "any"
-          ? Number(b.workplace === prefs.workplace) -
-            Number(a.workplace === prefs.workplace)
-          : 0) || (b.score ?? -1) - (a.score ?? -1),
+      : (b.score ?? -1) - (a.score ?? -1),
   );
 
   return (
@@ -516,7 +521,7 @@ export default function Home() {
                       <h1>
                         {view === "saved"
                           ? "Saved jobs"
-                          : "AI and data jobs in the Netherlands"}
+                          : "Tech jobs in the Netherlands"}
                       </h1>
                       <p>
                         {view === "saved"
@@ -549,8 +554,7 @@ export default function Home() {
                             className={tab === "all" ? "selected" : ""}
                             onClick={() => setTab("all")}
                           >
-                            All matches{" "}
-                            <span>{jobs.length - skipped.length}</span>
+                            All matches
                           </button>
                           <button
                             className={tab === "strong" ? "selected" : ""}
@@ -598,9 +602,6 @@ export default function Home() {
                         >
                           <SlidersHorizontal size={17} />
                           Filters
-                          {prefs.families.length > 0 && (
-                            <span>{prefs.families.length}</span>
-                          )}
                         </button>
                       </div>
                       <div className="result-count">
@@ -795,58 +796,6 @@ export default function Home() {
                         </div>
                       )}
                     </div>
-                    <aside className="context-column">
-                      <div className="profile-card">
-                        <div className="card-kicker">
-                          YOUR MATCHING PROFILE{" "}
-                          <button
-                            className="icon-button"
-                            aria-label="Edit CV"
-                            onClick={() => navigate("profile")}
-                          >
-                            <ArrowUpRight size={17} />
-                          </button>
-                        </div>
-                        <div className="profile-file">
-                          <div>
-                            <FileText size={24} />
-                          </div>
-                          <span>
-                            <strong>{cvName}</strong>
-                            <small>
-                              {evidence.length
-                                ? "Ready for matching"
-                                : "Add your experience"}
-                            </small>
-                          </span>
-                          {evidence.length > 0 && (
-                            <span className="verified-check">
-                              <Check size={13} />
-                            </span>
-                          )}
-                        </div>
-                        <div className="profile-divider" />
-                        <div className="evidence-total">
-                          <span>Verified evidence spans</span>
-                          <strong>{evidence.length}</strong>
-                        </div>
-                        <div className="profile-skills">
-                          {Array.from(
-                            new Set(evidence.flatMap((e) => e.skills)),
-                          )
-                            .slice(0, 6)
-                            .map((s) => (
-                              <span key={s}>{s}</span>
-                            ))}
-                        </div>
-                        <button
-                          className="profile-link"
-                          onClick={() => navigate("profile")}
-                        >
-                          Manage your CV <ArrowRight size={15} />
-                        </button>
-                      </div>
-                    </aside>
                   </section>
                 </>
               )}
@@ -870,10 +819,7 @@ export default function Home() {
                   </section>
                   <div className="form-grid">
                     <section className="panel upload-panel">
-                      <div className="section-number">
-                        01 <span>YOUR CV</span>
-                      </div>
-                      <h2>A little context goes a long way.</h2>
+                      <h2>Upload or replace your CV</h2>
                       <p>
                         Use a text-based PDF, Word document, or plain text CV.
                       </p>
@@ -901,9 +847,7 @@ export default function Home() {
                           )}
                         </span>
                         <strong>
-                          {busy
-                            ? "Finding your evidence…"
-                            : "Drop your CV here"}
+                          {busy ? "Reading your CV…" : "Drop your CV here"}
                         </strong>
                         <span>
                           or <b>browse files</b>
@@ -945,7 +889,7 @@ export default function Home() {
                         disabled={busy || draft.trim().length < 50}
                         onClick={() => parseCV(undefined, draft)}
                       >
-                        Find my evidence <ArrowRight size={17} />
+                        Use this CV <ArrowRight size={17} />
                       </button>
                       <div className="privacy-note">
                         <ShieldCheck size={16} />
@@ -957,11 +901,8 @@ export default function Home() {
                       </div>
                     </section>
                     <section className="panel evidence-panel">
-                      <div className="section-number">
-                        02 <span>YOUR VERIFIED EVIDENCE</span>
-                      </div>
                       <div className="evidence-heading">
-                        <h2>{evidence.length} real pieces of your story.</h2>
+                        <h2>Current CV</h2>
                         {evidence.length > 0 && (
                           <button
                             className="text-button danger"
@@ -971,39 +912,31 @@ export default function Home() {
                           </button>
                         )}
                       </div>
-                      <p>
-                        These are exact passages from your CV. A requirement is
-                        only marked as met when a passage supports it.
-                      </p>
+                      <p>{evidence.length ? cvName : "No CV uploaded."}</p>
                       {!evidence.length && (
                         <div className="evidence-placeholder">
                           <FileText size={35} />
-                          <p>Your verified passages will appear here.</p>
+                          <p>Upload your CV to start finding jobs.</p>
                         </div>
                       )}
-                      <div className="evidence-list">
-                        {evidence.map((ev, i) => (
-                          <div className="evidence-row" key={ev.id}>
-                            <span className="evidence-index">
-                              {String(i + 1).padStart(2, "0")}
-                            </span>
-                            <div>
-                              <blockquote>{ev.quote}</blockquote>
-                              <div>
-                                {ev.skills.map((s) => (
-                                  <span className="small-chip" key={s}>
-                                    {s}
-                                  </span>
-                                ))}
-                              </div>
-                              <small>
-                                <ShieldCheck size={12} />
-                                Verified · characters {ev.start}–{ev.end}
-                              </small>
-                            </div>
+                      {evidence.length > 0 && (
+                        <details className="cv-preview">
+                          <summary>
+                            Review extracted CV text ({evidence.length}{" "}
+                            passages)
+                          </summary>
+                          <p>
+                            Check that your CV was read correctly. These are
+                            copied passages, not independently verified claims.
+                            Matching quotes also appear in each job’s details.
+                          </p>
+                          <div className="evidence-list">
+                            {evidence.map((ev) => (
+                              <p key={ev.id}>{ev.quote}</p>
+                            ))}
                           </div>
-                        ))}
-                      </div>
+                        </details>
+                      )}
                     </section>
                   </div>
                 </>
@@ -1047,6 +980,32 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="preference-section">
+                        <h2>Career level</h2>
+                        <p>
+                          Estimated from job titles. Leave all unselected to
+                          include every level. “Not specified” includes titles
+                          without a clear level.
+                        </p>
+                        <div className="choice-chips">
+                          {careerLevels.map(([value, label]) => (
+                            <button
+                              key={value}
+                              className={
+                                prefs.career_levels.includes(value)
+                                  ? "chosen"
+                                  : ""
+                              }
+                              aria-pressed={prefs.career_levels.includes(value)}
+                              onClick={() =>
+                                togglePreference("career_levels", value)
+                              }
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="preference-section">
                         <h2>Employment and workplace</h2>
                         <label>Employment type</label>
                         <div className="choice-chips">
@@ -1072,10 +1031,7 @@ export default function Home() {
                             ),
                           )}
                         </div>
-                        <label htmlFor="workplace">
-                          Workplace preference{" "}
-                          <span>(a preference, not a hard filter)</span>
-                        </label>
+                        <label htmlFor="workplace">Work arrangement</label>
                         <select
                           id="workplace"
                           value={prefs.workplace}
@@ -1089,6 +1045,11 @@ export default function Home() {
                             </option>
                           ))}
                         </select>
+                        <p>
+                          Only jobs with the selected arrangement are shown.
+                          Choose “Open to anything” to include unspecified
+                          arrangements.
+                        </p>
                       </div>
                       <div className="form-footer">
                         <button

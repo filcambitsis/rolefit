@@ -1,6 +1,6 @@
 # RoleFit
 
-A local portfolio app for exploring AI and data jobs in the Netherlands with evidence from your CV.
+A local portfolio app for exploring AI, data and software jobs in the Netherlands with evidence from your CV.
 
 Upload a CV, set role and employment preferences, and explore public vacancies ranked by **requirement coverage**. Open a role to see exact CV passages behind skill matches, requirements that need manual review, and the original application link.
 
@@ -50,7 +50,7 @@ Open the same frontend URL. Stop any previous frontend with Ctrl+C first. The de
 2. **Extract requirements.** Recognise qualification sections and map explicit skills through a small reviewed vocabulary. Preserve other requirements as unverified instead of silently discarding them.
 3. **Match mentions.** Link recognised skills to exact CV passages. A mention is not proof of proficiency, production experience or every condition in a job sentence.
 4. **Calculate coverage.** Required items carry 85% and preferred items 15%. If only one group is present, it carries 100%. No extracted requirements means **no score**, not 0%.
-5. **Order results.** Coverage first, BM25 text overlap for ties. Only jobs explicitly available in the Netherlands are shown; role family and employment type are filters; workplace preference can reorder the displayed results.
+5. **Order results.** Coverage first, BM25 text overlap for ties. Only jobs explicitly available in the Netherlands are shown; role type, employment type, career level and work arrangement filter the results.
 
 Degree, relevant experience and other complex requirements remain **“Not verified in your CV”** for manual review. This does not mean the candidate lacks them. Senior roles and limited extractions have visible reminders to inspect the original posting.
 
@@ -135,4 +135,6 @@ MIT licensed. Earlier research plans are preserved in [docs/archive](docs/archiv
 
 ## Netherlands-only scope
 
-RoleFit collects English-language AI and data listings from Eye Security, DataSnipper, IMC and TomTom. Remote roles must explicitly list the Netherlands as an allowed location. There are no country or city controls, LinkedIn/Indeed integrations, or pasted-job inputs. Unknown employment types remain excluded rather than guessed. Availability depends on current employer postings.
+RoleFit collects English-language AI, data and software listings from Eye Security, DataSnipper, IMC and TomTom. Remote roles must explicitly list the Netherlands as an allowed location. There are no country or city controls, LinkedIn/Indeed integrations, or pasted-job inputs. Unknown employment types remain excluded rather than guessed. Availability depends on current employer postings.
+
+Career-level filters use explicit job-title cues (or internship employment type), not CV-based eligibility judgments. Unmarked titles are “Not specified”; junior/mid/senior levels are not guessed from missing information. The CV page offers a collapsed preview of extracted passages, with exact supporting quotes still available in job details.

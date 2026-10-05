@@ -6,7 +6,14 @@ from bs4 import BeautifulSoup
 from langdetect import DetectorFactory, LangDetectException, detect
 
 DetectorFactory.seed = 42
-FAMILIES = ["AI Engineer", "ML Engineer", "Data Scientist", "Data Analyst"]
+FAMILIES = [
+    "AI Engineer",
+    "ML Engineer",
+    "Data Scientist",
+    "Data Analyst",
+    "Data Engineer",
+    "Software Engineer",
+]
 
 
 def strip_html(value: str) -> str:
@@ -35,7 +42,30 @@ def family(title: str) -> str | None:
         r"engineer|developer", value
     ):
         return FAMILIES[0]
+    if re.search(r"\bdata (?:platform |warehouse )?engineer", value):
+        return "Data Engineer"
+    if re.search(
+        r"\b(?:software|back[ -]?end|front[ -]?end|full[ -]?stack|mobile|ios|android|web) (?:engineer|developer)",
+        value,
+    ):
+        return "Software Engineer"
     return None
+
+
+def career_level(title: str, employment_type: str = "") -> str:
+    """Only classify explicit title signals; an unmarked title is not automatically mid-level."""
+    value = title.lower()
+    if employment_type == "internship" or re.search(r"\bintern(?:ship)?\b", value):
+        return "internship"
+    if re.search(r"\b(?:lead|staff|principal|manager|head|director)\b", value):
+        return "lead"
+    if re.search(r"\b(?:senior|sr)\b", value):
+        return "senior"
+    if re.search(r"\b(?:junior|jr|graduate|entry[ -]level)\b", value):
+        return "junior"
+    if re.search(r"\b(?:mid[ -]level|medior|intermediate)\b", value):
+        return "mid"
+    return "unknown"
 
 
 def employment(value: str, text: str) -> tuple[str, str]:

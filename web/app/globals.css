@@ -303,7 +303,7 @@ h1 {
 }
 .workspace-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 265px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 25px;
   align-items: flex-start;
 }
@@ -650,113 +650,6 @@ h1 {
 .text-button:hover {
   color: var(--blue);
 }
-.context-column {
-  padding-top: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.profile-card {
-  background: white;
-  border: 1px solid #e3e7ef;
-  border-radius: 11px;
-  padding: 19px;
-}
-.card-kicker {
-  font-size: 9px;
-  letter-spacing: 1px;
-  color: #8b93a3;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-.card-kicker button {
-  margin: -6px;
-  color: #9ba4b7;
-}
-.profile-file {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.profile-file > div {
-  padding: 10px;
-  background: #f0f4fd;
-  color: #7288bb;
-  border-radius: 8px;
-  display: flex;
-}
-.profile-file > span:nth-child(2) {
-  min-width: 0;
-}
-.profile-file strong {
-  font-size: 11px;
-  display: block;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-  color: #5b667c;
-}
-.profile-file small {
-  font-size: 10px;
-  display: block;
-  color: #9aa4b5;
-  margin-top: 4px;
-}
-.verified-check {
-  width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  background: #eaf7f0;
-  color: #55967d;
-  border-radius: 50%;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-.profile-divider {
-  height: 1px;
-  background: #edf0f5;
-  margin: 20px 0 17px;
-}
-.evidence-total {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #8a94a5;
-}
-.evidence-total strong {
-  font-size: 13px;
-  font-weight: 600;
-  color: #506287;
-}
-.profile-skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 14px;
-}
-.profile-skills span {
-  font-size: 10px;
-  color: #8190aa;
-  background: #f5f7fb;
-  border: 1px solid #eaf0f8;
-  border-radius: 4px;
-  padding: 3px 7px;
-}
-.profile-link {
-  font-size: 11px;
-  color: #6880b0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid #eef1f7;
-  padding: 14px 0 0;
-  margin-top: 20px;
-  width: 100%;
-}
 .panel {
   background: white;
   border: 1px solid var(--line);
@@ -777,24 +670,9 @@ h1 {
 }
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1.1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 25px;
   align-items: flex-start;
-}
-.section-number {
-  font-size: 11px;
-  font-weight: 600;
-  color: #7790d8;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  letter-spacing: 1px;
-  margin-bottom: 22px;
-}
-.section-number > span {
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  color: #8e99ae;
 }
 .dropzone {
   display: flex;
@@ -901,31 +779,6 @@ textarea::placeholder {
   max-height: 725px;
   overflow: auto;
 }
-.evidence-row {
-  display: flex;
-  gap: 13px;
-  border-top: 1px solid #edf1f7;
-  padding: 18px 0;
-}
-.evidence-index {
-  font-size: 10px;
-  color: #a8b6cc;
-  padding-top: 2px;
-}
-.evidence-row blockquote {
-  font-size: 12px;
-  line-height: 1.75;
-  color: #7c8ba4;
-  margin: 0 0 9px;
-}
-.evidence-row small {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  font-size: 9px;
-  color: #a8b3c3;
-  margin-top: 8px;
-}
 .small-chip {
   display: inline-block;
   font-size: 9px;
@@ -965,9 +818,6 @@ textarea::placeholder {
 }
 .preference-section:last-of-type {
   margin-bottom: 22px;
-}
-.preference-section .section-number {
-  margin-bottom: 14px;
 }
 .role-options {
   display: grid;
@@ -1492,14 +1342,9 @@ textarea::placeholder {
 .fit-summary > div > span,
 .company-line span,
 .job-meta .workplace-tag,
-.card-kicker,
-.profile-file strong,
-.evidence-total,
-.profile-link,
 .page-heading p,
 .panel > p,
 .preference-section > p,
-.evidence-row blockquote,
 .requirement-title strong,
 .requirement blockquote,
 .job-description p {
@@ -1507,9 +1352,6 @@ textarea::placeholder {
 }
 .job-skills > span,
 .fit-summary > div > span,
-.profile-skills span,
-.profile-file small,
-.evidence-row small,
 .requirement small,
 .requirement.missing p,
 .result-count,
@@ -1519,9 +1361,6 @@ textarea::placeholder {
 }
 .job-footer .text-button {
   white-space: nowrap;
-}
-.evidence-total {
-  gap: 8px;
 }
 .role-options strong,
 .choice-chips > button,
@@ -1534,7 +1373,7 @@ textarea::placeholder {
     padding: 50px 60px;
   }
   .workspace-grid {
-    grid-template-columns: minmax(0, 1fr) 310px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 30px;
   }
   .sidebar {
@@ -1542,9 +1381,6 @@ textarea::placeholder {
   }
   .main-shell {
     margin-left: 255px;
-  }
-  .profile-card {
-    padding: 23px;
   }
   .job-card {
     padding: 26px 28px 0;
@@ -1575,7 +1411,7 @@ textarea::placeholder {
     padding: 0 28px;
   }
   .workspace-grid {
-    grid-template-columns: minmax(0, 1fr) 235px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
   .page-heading {
@@ -1601,7 +1437,7 @@ textarea::placeholder {
     grid-template-columns: 1fr;
   }
   .form-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
   }
   .panel {
@@ -1617,21 +1453,6 @@ textarea::placeholder {
   .job-skills > span {
     font-size: 11px;
   }
-  .profile-file strong {
-    font-size: 12px;
-  }
-  .profile-file {
-    gap: 7px;
-  }
-  .profile-file > div {
-    padding: 8px;
-  }
-  .verified-check {
-    display: none;
-  }
-  .context-column {
-    gap: 16px;
-  }
   .job-title {
     font-size: 16px;
   }
@@ -1643,17 +1464,14 @@ textarea::placeholder {
   .main-shell {
     margin-left: 200px;
   }
-  .context-column {
-    display: none;
-  }
   .workspace-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .page-heading > .button {
     font-size: 12px;
   }
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .evidence-list {
     max-height: 500px;
@@ -1943,25 +1761,16 @@ textarea::placeholder {
 .page-heading p,
 .job-meta,
 .fit-summary > div > span,
-.profile-file small,
-.evidence-total,
 .result-count,
 .sort-label select {
   color: #69768e;
 }
 .panel > p,
 .preference-section > p,
-.evidence-row blockquote,
 .requirement blockquote,
 .job-description p {
   font-size: 14px;
   color: #64758e;
-}
-.profile-file strong {
-  color: #465671;
-}
-.profile-skills span {
-  color: #5f7292;
 }
 .eyebrow {
   font-size: 11px;
@@ -1969,12 +1778,7 @@ textarea::placeholder {
 .workspace-label {
   font-size: 11px;
 }
-.card-kicker,
-.section-number > span {
-  font-size: 11px;
-}
 .company-line span,
-.profile-file small,
 .result-count,
 .result-count > span:last-child {
   font-size: 12px;
@@ -1982,8 +1786,6 @@ textarea::placeholder {
 .job-meta {
   font-size: 14px;
 }
-.profile-link,
-.evidence-total,
 .privacy-note p {
   font-size: 13px;
 }
@@ -2033,4 +1835,37 @@ textarea::placeholder {
   margin: 32px 0 0;
   color: #717b8e;
   font-size: 12px;
+}
+
+/* Keep the main tasks in one readable column. */
+.workspace-grid,
+.form-grid {
+  max-width: 980px;
+}
+.cv-preview summary {
+  cursor: pointer;
+  font-weight: 500;
+  padding: 12px 0;
+}
+.cv-preview > p {
+  margin-top: 12px;
+}
+.cv-preview .evidence-list {
+  max-height: 360px;
+  padding: 0 12px;
+  border-left: 2px solid #e4e8f0;
+}
+.cv-preview .evidence-list p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+.panel,
+.job-card {
+  border-radius: 6px;
+  box-shadow: none;
+}
+.page-heading h1 {
+  font-size: 28px;
+  letter-spacing: -0.6px;
 }

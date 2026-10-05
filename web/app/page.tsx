@@ -1227,7 +1227,7 @@ export default function Home() {
                           <blockquote>“{r.evidence.quote}”</blockquote>
                           <small>
                             <ShieldCheck size={12} />
-                            Exact CV passage · skill mentioned
+                            {r.note || "Exact CV passage · skill mentioned"}
                           </small>
                         </>
                       ) : (

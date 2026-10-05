@@ -13,6 +13,7 @@ export type Requirement = {
   required: boolean;
   status: string;
   tier: string;
+  note?: string | null;
   evidence: Evidence | null;
 };
 export type Job = {

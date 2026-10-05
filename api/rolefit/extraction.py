@@ -16,7 +16,7 @@ from .skills import mentions, normalize_skill
 
 # Bump this when extraction rules or the skills vocabulary change:
 # stored requirements with an older version are extracted again.
-PROMPT_VERSION = "evidence-v9"
+PROMPT_VERSION = "evidence-v10"
 MAX_TEXT = 150_000
 
 
@@ -281,7 +281,9 @@ def extract_requirements(raw, db=None, use_llm=False):
                 re.search(r"nice to have|(?:is|will be) a plus|not required|preferred", line, re.I)
             )
             # Preserve unsupported requirements too; dropping them inflates coverage.
-            if re.search(r"\b(?:bachelor|master|ph\.?d|ph\.d\.|BS/BA|MS/MA|degree)\b", line, re.I):
+            if re.search(
+                r"\b(?:bachelor|master|ph\.?d|ph\.d\.|BS/BA|MS/MA|BSc|MSc|BS|MS|degree)\b", line, re.I
+            ):
                 candidates.append(
                     {"quote": line, "category": "education", "skill": None, "required": required}
                 )

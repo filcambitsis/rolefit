@@ -573,5 +573,49 @@ def test_unspecified_employment_can_be_filtered(client, job, db):
         == 200
     )
     assert len(client.post("/matches").json()["jobs"]) == 1
-    client.put("/preferences", json={"families": ["AI Solutions & Implementation"], "employment": ["full-time"]})
+    client.put(
+        "/preferences", json={"families": ["AI Solutions & Implementation"], "employment": ["full-time"]}
+    )
     assert client.post("/matches").json()["jobs"] == []
+
+
+@pytest.mark.parametrize(
+    "cv,expected,tier",
+    [
+        ("BSc Artificial Intelligence, graduated 2024", "met", "education"),
+        ("BSc Artificial Intelligence, expected 2028", "not_verified", "education_in_progress"),
+        ("BSc Artificial Intelligence", "not_verified", "education_review"),
+        ("BSc History, graduated 2024", "not_verified", "unverified"),
+        ("MSc Artificial Intelligence, completed 2024", "met", "education"),
+        ("BSc Artificial Intelligence\nExpected graduation 2028", "not_verified", "education_in_progress"),
+    ],
+)
+def test_related_ai_degree(cv, expected, tier):
+    raw = "EDUCATION\n" + cv
+    rows = [SimpleNamespace(id=str(i), **r) for i, r in enumerate(extract_cv(raw)[0])]
+    req = SimpleNamespace(
+        id="r",
+        text="BS (or higher) in Computer Science, or a related field",
+        category="education",
+        skill=None,
+        required=True,
+    )
+    result = match_requirement(req, rows, raw)
+    assert result["status"] == expected
+    assert result["tier"] == tier
+    if result["evidence"]:
+        e = result["evidence"]
+        assert raw[e["start"] : e["end"]] == e["quote"]
+
+
+def test_degree_subject_and_level_are_not_assumed():
+    raw = "EDUCATION\nBSc Artificial Intelligence, graduated 2024"
+    rows = [SimpleNamespace(id=str(i), **r) for i, r in enumerate(extract_cv(raw)[0])]
+    for text in ["BS in Computer Science", "Masters in Computer Science or a related field"]:
+        req = SimpleNamespace(id="r", text=text, category="education", skill=None, required=True)
+        assert match_requirement(req, rows, raw)["status"] == "not_verified"
+
+
+def test_bs_requirement_is_education():
+    rows = extract_requirements("Requirements\nBS (or higher) in Computer Science, or a related field")
+    assert rows[0]["category"] == "education"

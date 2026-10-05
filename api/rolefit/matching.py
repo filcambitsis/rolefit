@@ -1,4 +1,5 @@
 import re
+from datetime import datetime, timezone
 
 from .skills import mentions
 
@@ -28,6 +29,74 @@ def valid_evidence(raw, row):
     )
 
 
+DEGREES = (
+    (1, r"\b(?:bachelor(?:'s)?|b\.?sc\.?|b\.?s\.?|beng)\b"),
+    (2, r"\b(?:master(?:'s|s)?|m\.?sc\.?|m\.?s\.?|meng)\b"),
+    (3, r"\b(?:ph\.?d\.?|doctorate|doctoral)\b"),
+)
+SUBJECTS = {
+    "cs": r"\bcomputer science\b",
+    "ai": r"\bartificial intelligence\b|\bAI\b",
+    "software": r"\bsoftware engineering\b",
+    "data": r"\bdata science\b",
+}
+
+
+def degree_level(text):
+    levels = [level for level, pattern in DEGREES if re.search(pattern, text, re.I)]
+    return min(levels) if levels else None
+
+
+def education_match(text, valid, raw):
+    """Recognise a small set of related computing degrees; retain exact CV text."""
+    required_level = degree_level(text)
+    subjects = {key for key, pattern in SUBJECTS.items() if re.search(pattern, text, re.I)}
+    if not required_level or not subjects:
+        return None, "unverified", None
+    related = bool(re.search(r"related (?:field|subject|discipline)", text, re.I))
+    best = (None, "unverified", None)
+    for row in valid:
+        if row.section != "education" or not degree_level(row.quote):
+            continue
+        # Include nearby lines for a split subject/date, but stop before another degree.
+        end = row.end
+        following = sorted((e for e in valid if e.start >= row.end), key=lambda e: e.start)
+        for next_row in following[:3]:
+            if (
+                next_row.section != "education"
+                or degree_level(next_row.quote)
+                or raw[end : next_row.start].strip()
+            ):
+                break
+            end = next_row.end
+        quote = raw[row.start : end]
+        level = degree_level(row.quote)
+        cv_subjects = {key for key, pattern in SUBJECTS.items() if re.search(pattern, quote, re.I)}
+        if level < required_level or not (subjects & cv_subjects or (related and cv_subjects)):
+            continue
+        passage = {**evidence_dict(row), "quote": quote, "end": end}
+        ongoing = re.search(
+            r"\b(?:present|current|ongoing|expected|pursuing|in progress|not completed|incomplete|dropped out)\b",
+            quote,
+            re.I,
+        )
+        years = [int(year) for year in re.findall(r"\b(?:19|20)\d{2}\b", quote)]
+        current_year = datetime.now(timezone.utc).year
+        if ongoing or any(year > current_year for year in years):
+            best = (passage, "education_in_progress", "Related degree in progress")
+            continue
+        completed = re.search(r"\b(?:graduated|completed|awarded|earned)\b", quote, re.I)
+        dated = bool(
+            re.search(r"\b(?:19|20)\d{2}\s*[-–—]\s*(?:19|20)\d{2}\b", quote) and max(years) < current_year
+        )
+        # Additional constraints such as grades or accreditation need manual review.
+        extra = re.search(r"gpa|grade|honou?rs|accredited|\band\b|years?", text, re.I)
+        if (completed or dated) and not extra:
+            return passage, "education", "Related degree found in your CV"
+        best = (passage, "education_review", "Related degree found — check completion and requirements")
+    return best
+
+
 def match_requirement(req, evidence, raw):
     """Decide whether one job requirement is supported by a CV passage.
 
@@ -35,6 +104,18 @@ def match_requirement(req, evidence, raw):
     Everything else stays unverified; we never guess.
     """
     valid = [e for e in evidence if valid_evidence(raw, e)]
+    if req.category == "education":
+        passage, tier, note = education_match(req.text, valid, raw)
+        return {
+            "id": req.id,
+            "text": req.text,
+            "skill": req.skill,
+            "required": req.required,
+            "status": "met" if tier == "education" else "not_verified",
+            "tier": tier,
+            "evidence": passage,
+            "note": note,
+        }
     found, tier = None, "unverified"
     if req.skill:
         # Skill requirements: a CV passage must mention the same vocabulary skill.

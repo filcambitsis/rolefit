@@ -162,3 +162,5 @@ Preferences use broad groups rather than separate filters for every title varian
 | AI Solutions & Implementation | AI Solutions Engineer, AI Implementation Consultant, AI Adoption Specialist |
 
 Existing data, ML and software groups remain available. Industrial/PLC and QA test automation are excluded. Seniority is a separate filter: adding architect titles does not label them junior. Sources are refreshed by `make refresh`; support for a group does not guarantee a current vacancy. Existing saved filters stay unchanged—reset preferences to include all new groups and unspecified employment.
+
+Education matching recognises AI, computer science, software engineering and data science as related computing subjects when the posting allows a related field. Degree level and completion are checked separately. In-progress or unclear degrees show the relevant CV passage without counting as completed qualifications. Other subjects and complex requirements still need manual review.

@@ -6,7 +6,6 @@ experimental embedding vectors are no longer read or written.
 
 from alembic import op
 import sqlalchemy as sa
-import pgvector.sqlalchemy
 
 revision = "89519f2d867b"
 down_revision = "b7147e77d201"
@@ -29,7 +28,7 @@ def downgrade():
             batch.add_column(
                 sa.Column(
                     "embedding",
-                    sa.JSON().with_variant(pgvector.sqlalchemy.vector.VECTOR(dim=768), "postgresql"),
+                    sa.JSON(),
                     nullable=True,
                 )
             )

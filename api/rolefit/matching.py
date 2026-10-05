@@ -158,10 +158,8 @@ def match_requirement(req, evidence, raw):
         ):
             found = None
             tier = "manual_review"
-    elif req.category in ("experience", "education"):
-        # Dates alone do not establish relevant experience, and a degree title alone
-        # does not establish its completion, subject or alternatives. Keep these
-        # constraints visible for manual review rather than claiming they are met.
+    elif req.category == "experience":
+        # Dates alone do not establish relevant work experience.
         tier = "manual_review"
     return {
         "id": req.id,

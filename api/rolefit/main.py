@@ -10,9 +10,9 @@ from .auth import current_user
 from .config import settings
 from .db import get_db
 from .extraction import PROMPT_VERSION, extract_cv, extract_requirements, parse_file
-from .matching import coverage, evidence_dict, match_requirement, requirement_score
-from .models import CV, CrawlRun, Decision, Evidence, ExtractionCache, Job, Requirement, User
-from .normalization import FAMILIES, career_level
+from .matching import evidence_dict, match_requirement, requirement_score
+from .models import CV, CrawlRun, Decision, Evidence, Job, Requirement, User
+from .normalization import FAMILY_ALIASES, FAMILIES, career_level
 from .ranking import bm25_scores
 from .schemas import DecisionInput, Preferences
 from .skills import mentions
@@ -38,8 +38,8 @@ def latest_cv(db, user):
 def cv_evidence(db, cv):
     rows = list(db.scalars(select(Evidence).where(Evidence.cv_id == cv.id)))
     # Rebuild older local extractions to recover short skills and revised headings.
-    # Never resend an existing CV to an external model during a read.
-    if cv.prompt_version != PROMPT_VERSION and cv.model_version == "deterministic-preview-v1":
+    # Reparse previous extraction versions locally, including older model output.
+    if cv.prompt_version != PROMPT_VERSION:
         items, failed, total = extract_cv(cv.text)
         db.execute(delete(Evidence).where(Evidence.cv_id == cv.id))
         rows = [Evidence(cv_id=cv.id, **item) for item in items]
@@ -47,7 +47,7 @@ def cv_evidence(db, cv):
         cv.prompt_version = PROMPT_VERSION
         cv.verification_failures, cv.extraction_count = failed, total
         db.flush()
-    # Model-extracted passages keep their quotes and provenance; only skill tags change.
+    # Keep vocabulary tags current without changing exact quotes.
     for row in rows:
         skills = mentions(row.quote)
         if row.skills != skills:
@@ -55,17 +55,11 @@ def cv_evidence(db, cv):
     return rows
 
 
-def clear_cv_cache(db, user):
-    cv_ids = db.scalars(select(CV.id).where(CV.user_id == user.id))
-    scopes = [user.id, *("adjudication:" + cv_id for cv_id in cv_ids)]
-    # Old adjudication results can contain CV quotes even though the feature is gone.
-    db.execute(delete(ExtractionCache).where(ExtractionCache.scope.in_(scopes)))
-
-
 def saved_preferences(user):
     # Ignore role families that no longer exist, so old saved preferences still load.
     prefs = dict(user.preferences or {})
-    prefs["families"] = [f for f in prefs.get("families", []) if f in FAMILIES]
+    prefs["families"] = [FAMILY_ALIASES.get(f, f) for f in prefs.get("families", [])]
+    prefs["families"] = [f for f in prefs["families"] if f in FAMILIES]
     return Preferences.model_validate(prefs)
 
 
@@ -94,22 +88,20 @@ def candidates(db, prefs):
     return [job for job in jobs if "NL" in job.countries]
 
 
-def ensure_requirements(db, job, use_llm=False):
+def ensure_requirements(db, job):
     """Return a job's requirements, extracting them again if missing or outdated."""
     reqs = list(db.scalars(select(Requirement).where(Requirement.job_id == job.id)))
-    up_to_date = all(r.prompt_version == PROMPT_VERSION for r in reqs) and (
-        not use_llm or all(r.model_version == settings().llm_model for r in reqs)
-    )
+    up_to_date = all(r.prompt_version == PROMPT_VERSION for r in reqs)
     if reqs and up_to_date:
         return reqs
     if reqs:
         db.execute(delete(Requirement).where(Requirement.job_id == job.id))
         reqs = []
-    for item in extract_requirements(job.description, db, use_llm):
+    for item in extract_requirements(job.description):
         row = Requirement(
             job_id=job.id,
             **item,
-            model_version=settings().llm_model if use_llm else "deterministic-preview-v1",
+            model_version="rules-v1",
             prompt_version=PROMPT_VERSION,
         )
         db.add(row)
@@ -132,15 +124,12 @@ def job_payload(db, job, cv, evidence):
         "family": job.family,
         "career_level": career_level(job.title, job.employment),
         "employment": job.employment,
-        "employment_provenance": job.employment_provenance,
         "workplace": job.workplace,
         "provider": job.provider,
         "url": job.url,
         "score": score,
-        "required_coverage": coverage(decisions, True),
         "requirements": decisions,
         "first_seen": job.first_seen.isoformat(),
-        "method": "Requirement coverage",
     }
 
 
@@ -184,7 +173,6 @@ def me(db: Session = Depends(get_db), user: User = Depends(current_user)):
         "evidence": [evidence_dict(e) for e in evidence],
         "preferences": saved_preferences(user).model_dump(),
         "saved": [d.job_id for d in decisions if d.state == "saved"],
-        "skipped": [d.job_id for d in decisions if d.state == "skipped"],
     }
 
 
@@ -205,22 +193,20 @@ async def upload_cv(
     finally:
         await file.close()  # Close and remove Starlette's temporary original, even on failure.
     del data
-    use_llm = bool(settings().llm_api_key and settings().llm_model)
     try:
-        items, failed, total = extract_cv(raw, db, user.id, use_llm)
+        items, failed, total = extract_cv(raw)
     except Exception as exc:
         # Do not expose upstream payloads or provider credentials.
-        raise HTTPException(422, "CV structuring failed. Check extraction configuration and budget.") from exc
+        raise HTTPException(422, "Could not extract CV text. Try a simpler document layout.") from exc
     if not items:
         raise HTTPException(422, "No verifiable evidence was found")
-    clear_cv_cache(db, user)
     db.execute(delete(CV).where(CV.user_id == user.id))
     cv = CV(
         user_id=user.id,
         text=raw,
         content_hash=hashlib.sha256(raw.encode()).hexdigest(),
         filename=filename,
-        model_version=settings().llm_model if use_llm else "deterministic-preview-v1",
+        model_version="rules-v1",
         prompt_version=PROMPT_VERSION,
         verification_failures=failed,
         extraction_count=total,
@@ -236,15 +222,12 @@ async def upload_cv(
         "evidence": [evidence_dict(e) for e in evidence],
         "verification_failures": failed,
         "extraction_count": total,
-        "failure_rate": failed / total if total else 0,
         "model_version": cv.model_version,
     }
 
 
 @app.delete("/cv", status_code=204)
 def delete_cv(db: Session = Depends(get_db), user: User = Depends(current_user)):
-    # Also remove any cached model output made from this user's CV.
-    clear_cv_cache(db, user)
     db.execute(delete(CV).where(CV.user_id == user.id))
     db.commit()
 
@@ -286,7 +269,6 @@ def matches(db: Session = Depends(get_db), user: User = Depends(current_user)):
     return {
         "jobs": [row for row, _ in ranked],
         "candidate_count": len(jobs),
-        "method": "Requirement coverage",
     }
 
 

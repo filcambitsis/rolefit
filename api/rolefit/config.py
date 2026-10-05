@@ -14,12 +14,6 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3002", "http://127.0.0.1:3002"]
     supabase_url: str = ""
     supabase_audience: str = "authenticated"
-    llm_base_url: str = "https://api.openai.com/v1"
-    llm_api_key: str = ""
-    llm_model: str = ""
-    llm_budget_usd: float = 5.0
-    llm_input_usd_per_million: float = 5.0
-    llm_output_usd_per_million: float = 20.0
 
 
 @lru_cache

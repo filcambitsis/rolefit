@@ -1,21 +1,19 @@
 # RoleFit
 
-A local portfolio app for exploring AI, data and software jobs in the Netherlands with evidence from your CV.
+A portfolio app for finding AI, data and software jobs in the Netherlands using evidence from your CV.
 
-Upload a CV, set role and employment preferences, and explore public vacancies ranked by **requirement coverage**. Open a role to see exact CV passages behind skill matches, requirements that need manual review, and the original application link.
+Upload a CV, choose preferences, compare job requirements with exact CV passages, save interesting roles and apply on the employer's site. Scores describe **requirement coverage**, not hiring probability.
 
-![RoleFit desktop workspace](docs/images/desktop.png)
+## Run locally
 
-## Try it
-
-Requires Python 3.12+ and Node.js 22+. Run from the repository root.
+Requires Python 3.12+ and Node.js 22+. From the repository root:
 
 ```sh
 make setup
 make refresh
 ```
 
-Then use two terminals:
+Run these in separate terminals:
 
 ```sh
 make run-api
@@ -25,13 +23,18 @@ make run-api
 make run-web
 ```
 
-Open **http://127.0.0.1:3002**. The API runs at **http://127.0.0.1:8000**; its interactive documentation is at **/docs**. The API root is not the frontend.
+Open **http://127.0.0.1:3002**. The API runs on port 8000; `/docs` is its API documentation. SQLite data stays in the ignored `work/` directory. Local development needs no account or paid API key.
 
-SQLite is used by default, with the database in the ignored `work/` folder. No accounts, paid API keys or model downloads are needed. An optional `.env` can override settings; see `.env.example`.
+After updating an existing checkout, stop the API, back up your database, then run:
 
-For an existing checkout, run `.venv/bin/alembic upgrade head` before starting the API. Back up your local database before migrations. `make refresh` updates public jobs; it does not need a CV.
+```sh
+.venv/bin/alembic upgrade head
+make run-api
+```
 
-### Fictional demo without the backend
+The cleanup migration keeps CVs, jobs and bookmarks, merges older AI preferences, and removes obsolete extraction caches, budgets and skipped decisions. Previously hidden jobs become visible again. Historical migration IDs remain supported; fresh installs no longer require pgvector. Migration downgrades do not recover deleted caches or skipped decisions.
+
+## Fictional demo
 
 ```sh
 cd web
@@ -40,127 +43,80 @@ cd ..
 make demo
 ```
 
-Open the same frontend URL. Stop any previous frontend with Ctrl+C first. The demo contains fictional companies and a fictional CV; PDF/DOCX parsing requires the backend. Demo preferences and saved sample IDs persist in the browser, but pasted CV text stays in memory.
+The demo uses a fixed fictional CV and jobs. Its results are generated with the **same Python extraction and matching code as the API**, rather than a second browser matching engine. Preferences and saved sample IDs persist in local browser storage. Uploading your own CV requires the connected app.
 
-![RoleFit requirement evidence](docs/images/evidence.png)
+Run `make demo-data` after changing matching, role groups, vocabulary or fictional fixtures. `make check` rejects an out-of-date demo fixture. No real CV data belongs in these fixtures or screenshots.
 
-## How matching works
+## Matching
 
-1. **Parse the CV.** Read PDF, DOCX or TXT and retain exact text passages with their offsets and sections. Scanned PDFs need a text layer.
-2. **Extract requirements.** Recognise qualification sections and map explicit skills through a small reviewed vocabulary. Preserve other requirements as unverified instead of silently discarding them.
-3. **Match mentions.** Link recognised skills to exact CV passages. A mention is not proof of proficiency, production experience or every condition in a job sentence.
-4. **Calculate coverage.** Required items carry 85% and preferred items 15%. If only one group is present, it carries 100%. No extracted requirements means **no score**, not 0%.
-5. **Order results.** Coverage first, BM25 text overlap for ties. Only jobs explicitly available in the Netherlands are shown; role type, employment type, career level and work arrangement filter the results.
+1. Parse a text-based PDF, DOCX or TXT into exact passages. Scanned PDFs need OCR first.
+2. Extract candidate requirements from recognised qualification sections and a reviewed skill vocabulary.
+3. Match basic skill mentions and supported computing degrees. AI is a related computing field where the posting permits one; degree level and completion dates are checked separately.
+4. Score required requirements at 85% and preferred ones at 15%, reweighting when only one group exists. No extracted requirements means no score.
+5. Sort by coverage, with BM25 text overlap as a tiebreaker. Users can also sort by newest posting.
 
-Degree, relevant experience and other complex requirements remain **“Not verified in your CV”** for manual review. This does not mean the candidate lacks them. Senior roles and limited extractions have visible reminders to inspect the original posting.
+“Not verified” does not mean a candidate lacks a skill. Proficiency, specialised experience, alternatives and complex requirements still need review. Exact quotations verify the source of a claim, not its truth. Accuracy is **partially reviewed**, not scientifically validated.
 
-The score is **not a hiring probability, eligibility decision or validated suitability rating**.
+## Scope
 
-## Architecture
+- Netherlands availability only, including remote jobs explicitly open there.
+- English-language listings from the public employer feeds in `data/seeds.json`.
+- AI/ML, data, software, automation, solutions, consulting and analyst roles.
+- **AI Consulting & Solutions** includes AI consulting, implementation, adoption and AI solutions titles. Old preference names are mapped automatically.
+- Career level comes from explicit title cues. An unmarked title is “Not specified”. Internship is selected under employment type and is not excluded by a regular-job career filter.
+- Unknown employment is shown as “Not specified”, not guessed. Work arrangement is optional.
+- Sources refresh only when `make refresh` runs. A failed board does not close its stored vacancies.
+
+No LinkedIn/Indeed scraping, pasted jobs, city filters, notifications, model extraction, skip lists or automatic background crawler. Available categories do not guarantee current vacancies.
+
+## Code layout
 
 ```mermaid
 flowchart LR
-    CV["CV: PDF / DOCX / TXT"] --> API["FastAPI"]
-    UI["Next.js / React frontend"] <--> API
-    API --> Parse["Exact passages + skill vocabulary"]
-    Parse --> DB[("SQLite locally / PostgreSQL schema")]
-    ATS["Greenhouse / Lever / Ashby"] --> Refresh["Crawl + normalise + extract"]
-    Refresh --> DB
-    DB --> Match["Requirement coverage + BM25"]
-    Match --> API
-    UI --> Apply["Employer application page"]
+    CV[CV upload] --> API[FastAPI]
+    Boards[Public employer feeds] --> Refresh[make refresh]
+    Refresh --> DB[(SQLite / PostgreSQL)]
+    API --> DB
+    API --> Rules[Extraction and matching rules]
+    Rules --> UI[Next.js frontend]
+    Rules --> Demo[Fictional demo snapshot]
 ```
 
-| Folder | Purpose |
+| Location | Purpose |
 | --- | --- |
-| `api/` | API, parsing, matching, crawlers, authentication and migrations |
-| `web/` | Responsive frontend and fictional demo |
-| `data/` | Public job-board sources, reviewed vocabulary, fictional CV |
-| `tests/` | Backend regression tests |
-| `scripts/` | Smoke test and optional scheduled crawl |
-| `docs/` | Validation notes, portfolio walkthrough, screenshots, archived research plans |
+| `api/rolefit/` | API, rules, CV parsing and job ingestion |
+| `api/alembic/` | Database migrations, including upgrades from earlier versions |
+| `web/app/page.tsx` | Application state and navigation |
+| `web/components/` | Job cards/details, CV profile and preferences |
+| `web/styles/` | Base, workspace, forms, details and responsive styles |
+| `web/lib/demo-data.json` | Generated fictional results |
+| `data/` | Sources, skill vocabulary and fictional fixture inputs |
+| `tests/` | Matching, isolation, ingestion, migration and API regressions |
 
-## Validation and scope
-
-- Tested parsing and application flows with **three user-supplied CVs**, kept out of Git.
-- AI-assisted qualitative review of **15 CV–job pairs** (five per profile), including internships, senior roles and extraction failures. This is not an independent human benchmark or a measured ranking-accuracy claim.
-- Regression tests cover scoring edge cases, exact evidence spans, user isolation, CV replacement/deletion, legacy caches, source failures and localhost-only development authentication.
-- Browser checks cover desktop/mobile layouts, upload, matching, preferences, empty results, save/skip, application links and backend errors.
-
-See [validation details](docs/validation.md) and the [portfolio walkthrough](docs/portfolio.md).
-
-## Commands
+## Checks and commands
 
 | Command | Purpose |
 | --- | --- |
-| `make demo` | Fictional frontend demonstration on port 3002 |
-| `make run-api` | Local API on port 8000 |
-| `make run-web` | Frontend connected to the local API |
-| `make refresh` | Crawl sources, extract requirements, print a summary |
-| `make crawl` / `make extract` | Run either refresh stage separately |
-| `make check` | Python tests/lint, demo tests, TypeScript, frontend lint/build |
-| `.venv/bin/alembic upgrade head` | Update the database schema |
+| `make check` | Demo consistency, Python tests/lint, frontend tests/types/lint/build |
+| `make refresh` | Fetch jobs, extract requirements and report source failures |
+| `make demo-data` | Regenerate fictional demo results |
+| `make demo` | Start the standalone demo |
+| `make up` | Optional PostgreSQL/Docker setup; requires real authentication |
 
-Refresh summaries are written to ignored `work/yield.json`. A failed board is reported and its existing jobs are preserved. Partial refreshes exit with a nonzero status so failures are visible.
-
-The optional `scripts/smoke_api.py` should run against a **disposable database**; it refuses to replace an existing CV.
-
-## Limitations
-
-- English-oriented, rule-based extraction misses unusual headings and layouts. Always read the original posting; some jobs have no score.
-- Skill aliases and keyword mentions cannot prove expertise. Alternatives such as “Python or R” are not fully modelled, and repeated or compound requirements may affect weighting.
-- Years of relevant experience, degree completion/subject, clearance and similar constraints require manual review.
-- Jobs come from a selected set of public boards, not the whole job market. Refresh data before demonstrating current vacancies.
-- The fictional demo is illustrative; it is not a benchmark of the backend.
-- This is a **local portfolio MVP**, not a deployed recruitment service. Production sign-in and private-data operations have not been validated as a hosted service.
+[Validation notes](docs/validation.md) distinguish automated tests, browser checks and manual matching review. [Portfolio notes](docs/portfolio.md) include a short presentation and CV bullet.
 
 ## Privacy and deployment
 
-Original uploads are discarded after parsing. Extracted text and evidence remain in the local database until replaced or deleted. Databases, real CVs and credentials are ignored by Git. See [retention notes](docs/retention.md).
+CV parsing and matching run locally in the backend; there is no external model provider. Original uploads are discarded after parsing. Retained text and evidence can be deleted or replaced. See [retention notes](docs/retention.md).
 
-Normal local use does not send CVs to a model provider. Optional `LLM_*` settings enable external extraction; leave them empty for private local testing. Enabling them sends CV text to the configured provider.
-
-Development authentication is restricted to loopback clients and localhost URLs/origins. Do not expose it publicly. The optional Docker/PostgreSQL recipe requires real authentication for API access; it is not the supported no-account quickstart. Public hosting and production account setup are separate work.
+Local development authentication is restricted to loopback requests and localhost origins. Supabase authentication, account isolation, database migrations and CI remain available for a future hosted version. Public deployment still needs operational configuration and a privacy review; the Docker recipe is not the no-account quickstart.
 
 ## Troubleshooting
 
-- **Port busy:** stop the previous RoleFit terminal with Ctrl+C; do not stop unrelated projects. Default frontend port is 3002 to avoid common port-3000 conflicts.
-- **API shows “Not Found”:** open port 3002 for the app; port 8000 is the API.
-- **Could not reach RoleFit:** start `make run-api` and check `http://127.0.0.1:8000/health`.
-- **No jobs:** run `make refresh` and check role and employment filters (include full-time).
-- **File-watcher errors on macOS:** the Makefile enables polling for the frontend.
-- **Changed demo/connected mode:** stop and restart the frontend with the appropriate Makefile command.
+- **Port busy:** stop the previous RoleFit process with Ctrl+C, without stopping other projects.
+- **API says Not Found:** the site is on port 3002, not 8000.
+- **Old role options rejected:** restart the API after applying migrations.
+- **No jobs:** run `make refresh`, then check preferences and include unspecified employment if appropriate.
+- **Switch demo/connected mode:** restart the frontend using the corresponding Makefile command.
 
-MIT licensed. Earlier research plans are preserved in [docs/archive](docs/archive/README.md); they are not claims of completed experiments.
-
-## Netherlands-only scope
-
-RoleFit collects English-language AI, data, software, consulting, solutions and product listings from the employer boards in `data/seeds.json`. Remote roles must explicitly list the Netherlands as an allowed location. There are no country or city controls, LinkedIn/Indeed integrations, or pasted-job inputs. Jobs without employment information are labelled “Not specified”; that option is included by default and can be deselected. Availability depends on current employer postings.
-
-Career-level filters use explicit job-title cues (or internship employment type), not CV-based eligibility judgments. Unmarked titles are “Not specified”; junior/mid/senior levels are not guessed from missing information. The CV page offers a collapsed preview of extracted passages, with exact supporting quotes still available in job details.
-
-Internship appears only under employment type. Career-level selections apply to regular jobs; an included internship is not excluded by a junior/senior selection.
-
-Role filters also include AI Consultant, Data Consultant and Technology Consultant. Available results depend on the employer boards; selecting a role does not guarantee vacancies.
-
-Matching is conservative: basic skill mentions can count, but advanced proficiency, production experience and either/or requirements remain unverified for manual review. Future learning intentions do not count as skills. The coverage percentage is a heuristic over extracted requirements, not a validated fit prediction.
-
-
-## Role title groups
-
-Preferences use broad groups rather than separate filters for every title variant:
-
-| Group | Examples |
-| --- | --- |
-| AI Engineer | Applied AI, GenAI, LLM Engineer |
-| AI & Automation Specialist | AI Specialist, Workflow Automation, RPA Engineer |
-| AI Consultant | AI Transformation, Data & AI Consultant |
-| Technology Consultant | Digital Transformation, Innovation Consultant |
-| Solutions Engineer | Solutions Engineer, Junior Solutions Architect |
-| Product Analyst | AI / Technical Product Analyst |
-| Business & Technology Analyst | Business Analyst, Technology Analyst, Solutions Analyst |
-| AI Solutions & Implementation | AI Solutions Engineer, AI Implementation Consultant, AI Adoption Specialist |
-
-Existing data, ML and software groups remain available. Industrial/PLC and QA test automation are excluded. Seniority is a separate filter: adding architect titles does not label them junior. Sources are refreshed by `make refresh`; support for a group does not guarantee a current vacancy. Existing saved filters stay unchanged—reset preferences to include all new groups and unspecified employment.
-
-Education matching recognises AI, computer science, software engineering and data science as related computing subjects when the posting allows a related field. Degree level and completion are checked separately. In-progress or unclear degrees show the relevant CV passage without counting as completed qualifications. Other subjects and complex requirements still need manual review.
+MIT licensed. [Archived research plans](docs/archive/README.md) are historical proposals, not completed experiments.

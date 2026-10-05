@@ -1,4 +1,4 @@
-.PHONY: setup check run-api run-web crawl extract refresh demo up
+.PHONY: setup check run-api run-web crawl extract refresh demo demo-data up
 setup:
 	python3 -m venv .venv
 	.venv/bin/pip install -e '.[dev]'
@@ -6,6 +6,7 @@ setup:
 	mkdir -p work
 	.venv/bin/alembic upgrade head
 check:
+	.venv/bin/python scripts/build_demo.py --check
 	.venv/bin/ruff check api scripts tests
 	.venv/bin/pytest -q
 	cd web && npm test && npm run typecheck && npm run lint && npm run build
@@ -22,5 +23,7 @@ up:
 
 refresh:
 	.venv/bin/rolefit refresh
+demo-data:
+	.venv/bin/python scripts/build_demo.py
 demo:
 	cd web && WATCHPACK_POLLING=true NEXT_PUBLIC_DEMO_MODE=true npm run dev

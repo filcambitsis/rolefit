@@ -1,6 +1,6 @@
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-from .normalization import FAMILIES
+from .normalization import FAMILY_ALIASES, FAMILIES
 
 
 class Preferences(BaseModel):
@@ -17,9 +17,12 @@ class Preferences(BaseModel):
     workplace: Literal["any", "remote", "hybrid", "on-site"] = "any"
     search: str = Field(default="", max_length=200)
 
-    @field_validator("families")
+    @field_validator("families", mode="before")
     @classmethod
     def valid_families(cls, values):
+        if not isinstance(values, list) or not all(isinstance(value, str) for value in values):
+            raise ValueError("Role families must be a list of names")
+        values = [FAMILY_ALIASES.get(value, value) for value in values]
         if not set(values).issubset(FAMILIES):
             raise ValueError("Unknown role family")
         return list(dict.fromkeys(values))
@@ -39,4 +42,4 @@ class Preferences(BaseModel):
 
 
 class DecisionInput(BaseModel):
-    state: Literal["saved", "skipped", "none"]
+    state: Literal["saved", "none"]

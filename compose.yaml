@@ -1,6 +1,6 @@
 services:
   db:
-    image: pgvector/pgvector:pg16
+    image: postgres:16
     environment:
       POSTGRES_USER: rolefit
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rolefit-local}
@@ -20,10 +20,6 @@ services:
       DEV_AUTH: ${DEV_AUTH:-false}
       CORS_ORIGINS: '${CORS_ORIGINS:-["http://localhost:3002","http://127.0.0.1:3002"]}'
       SUPABASE_URL: ${SUPABASE_URL:-}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
-      LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_MODEL: ${LLM_MODEL:-}
-      LLM_BUDGET_USD: ${LLM_BUDGET_USD:-5}
     depends_on:
       db:
         condition: service_healthy
@@ -31,14 +27,6 @@ services:
     build: .
     environment: *api-env
     ports: ["127.0.0.1:8000:8000"]
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
-    restart: unless-stopped
-  crawler:
-    build: .
-    command: python scripts/schedule.py
-    environment: *api-env
     depends_on:
       migrate:
         condition: service_completed_successfully

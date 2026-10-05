@@ -22,15 +22,15 @@ def crawl(seeds: Path = ROOT / "data/seeds.json"):
 
 
 @app.command()
-def extract(llm: bool = False):
-    """Extract requirements for every eligible job (--llm uses the configured model)."""
+def extract():
+    """Extract requirements for every eligible job."""
     from .main import candidates, ensure_requirements
     from .schemas import Preferences
 
     with SessionLocal() as db:
         jobs = candidates(db, Preferences())
         for i, job in enumerate(jobs):
-            ensure_requirements(db, job, llm)
+            ensure_requirements(db, job)
             db.commit()
             if i % 25 == 0:
                 typer.echo(f"Extracted {i + 1}/{len(jobs)}")

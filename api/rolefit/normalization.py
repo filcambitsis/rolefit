@@ -13,15 +13,20 @@ FAMILIES = [
     "Data Analyst",
     "Data Engineer",
     "Software Engineer",
-    "AI Consultant",
+    "AI Consulting & Solutions",
     "Data Consultant",
     "Technology Consultant",
     "AI & Automation Specialist",
     "Solutions Engineer",
     "Product Analyst",
     "Business & Technology Analyst",
-    "AI Solutions & Implementation",
 ]
+
+
+FAMILY_ALIASES = {
+    "AI Consultant": "AI Consulting & Solutions",
+    "AI Solutions & Implementation": "AI Consulting & Solutions",
+}
 
 
 def strip_html(value: str) -> str:
@@ -44,20 +49,20 @@ def family(title: str) -> str | None:
     if re.search(r"\bproduct owner\b", value):
         return None
     if ai and re.search(r"solutions?|implementation|adoption", value):
-        return "AI Solutions & Implementation"
+        return "AI Consulting & Solutions"
     if re.search(r"\bproduct analyst\b", value):
         return "Product Analyst"
     if re.search(r"\b(?:business|technology|solutions?) analyst\b", value):
         return "Business & Technology Analyst"
     if re.search(r"\b(?:consultant|consulting|advisor)\b", value):
         if ai:
-            return "AI Consultant"
+            return "AI Consulting & Solutions"
         if re.search(r"\bdata\b|analytics|business intelligence", value):
             return "Data Consultant"
         if re.search(r"technology|technical|digital|innovation|\bit\b|solutions?", value):
             return "Technology Consultant"
     if ai and re.search(r"adoption|transformation|implementation", value):
-        return "AI Consultant"
+        return "AI Consulting & Solutions"
     if re.search(r"\bsolutions? (?:engineer|architect)\b", value):
         return "Solutions Engineer"
     # Industrial and QA automation are outside this app's software/data scope.

@@ -1,0 +1,1067 @@
+{
+  "families": [
+    "AI Engineer",
+    "ML Engineer",
+    "Data Scientist",
+    "Data Analyst",
+    "Data Engineer",
+    "Software Engineer",
+    "AI Consulting & Solutions",
+    "Data Consultant",
+    "Technology Consultant",
+    "AI & Automation Specialist",
+    "Solutions Engineer",
+    "Product Analyst",
+    "Business & Technology Analyst"
+  ],
+  "evidence": [
+    {
+      "id": "ev-0",
+      "quote": "Machine Learning Engineer",
+      "start": 12,
+      "end": 37,
+      "section": "other",
+      "skills": [
+        "Machine learning"
+      ]
+    },
+    {
+      "id": "ev-1",
+      "quote": "Machine Learning Engineer · Northstar Labs · Jan 2022 – Dec 2025",
+      "start": 50,
+      "end": 114,
+      "section": "experience",
+      "skills": [
+        "Machine learning"
+      ]
+    },
+    {
+      "id": "ev-2",
+      "quote": "Built Python services for document search and retrieval-augmented generation.",
+      "start": 115,
+      "end": 192,
+      "section": "experience",
+      "skills": [
+        "Python",
+        "RAG"
+      ]
+    },
+    {
+      "id": "ev-3",
+      "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+      "start": 193,
+      "end": 268,
+      "section": "experience",
+      "skills": [
+        "PyTorch",
+        "Docker",
+        "FastAPI"
+      ]
+    },
+    {
+      "id": "ev-4",
+      "quote": "Designed SQL reporting pipelines over a PostgreSQL warehouse.",
+      "start": 269,
+      "end": 330,
+      "section": "experience",
+      "skills": [
+        "SQL"
+      ]
+    },
+    {
+      "id": "ev-5",
+      "quote": "Shipped production workloads on AWS with automated model monitoring.",
+      "start": 331,
+      "end": 399,
+      "section": "experience",
+      "skills": [
+        "AWS"
+      ]
+    },
+    {
+      "id": "ev-6",
+      "quote": "Collaborated with product teams to design experiments and evaluate model quality.",
+      "start": 400,
+      "end": 481,
+      "section": "experience",
+      "skills": [
+        "Experimental design"
+      ]
+    },
+    {
+      "id": "ev-7",
+      "quote": "MSc Computer Science · 2020 – 2022",
+      "start": 493,
+      "end": 527,
+      "section": "education",
+      "skills": []
+    },
+    {
+      "id": "ev-8",
+      "quote": "Built a semantic search tool using embeddings, vector databases and natural language processing.",
+      "start": 538,
+      "end": 634,
+      "section": "projects",
+      "skills": [
+        "NLP",
+        "Embeddings",
+        "Vector databases"
+      ]
+    },
+    {
+      "id": "ev-9",
+      "quote": "Created interactive dashboards using Python, pandas and data visualization.",
+      "start": 635,
+      "end": 710,
+      "section": "projects",
+      "skills": [
+        "Python",
+        "pandas",
+        "Data visualization"
+      ]
+    },
+    {
+      "id": "ev-10",
+      "quote": "English: fluent",
+      "start": 722,
+      "end": 737,
+      "section": "languages",
+      "skills": [
+        "English"
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "id": "demo-0",
+      "company": "Meridian",
+      "title": "AI Engineer, Search & Discovery",
+      "location": "Amsterdam, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "AI Engineer",
+      "employment": "full-time",
+      "career_level": "unknown",
+      "workplace": "hybrid",
+      "provider": "sample",
+      "url": "",
+      "score": 93,
+      "requirements": [
+        {
+          "id": "r-0-0",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-0-1",
+          "text": "Experience with RAG.",
+          "skill": "RAG",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-0-2",
+          "text": "Experience with FastAPI.",
+          "skill": "FastAPI",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        },
+        {
+          "id": "r-0-3",
+          "text": "Experience with Docker.",
+          "skill": "Docker",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        },
+        {
+          "id": "r-0-4",
+          "text": "Experience with Kubernetes.",
+          "skill": "Kubernetes",
+          "required": false,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        },
+        {
+          "id": "r-0-5",
+          "text": "Experience with Embeddings.",
+          "skill": "Embeddings",
+          "required": false,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-8",
+            "quote": "Built a semantic search tool using embeddings, vector databases and natural language processing.",
+            "start": 538,
+            "end": 634,
+            "section": "projects",
+            "skills": [
+              "NLP",
+              "Embeddings",
+              "Vector databases"
+            ]
+          }
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with Python.\nExperience with RAG.\nExperience with FastAPI.\nExperience with Docker.\nNice to have\nExperience with Kubernetes.\nExperience with Embeddings."
+    },
+    {
+      "id": "demo-1",
+      "company": "Arc",
+      "title": "Machine Learning Engineer",
+      "location": "Utrecht, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "ML Engineer",
+      "employment": "full-time",
+      "career_level": "unknown",
+      "workplace": "remote",
+      "provider": "sample",
+      "url": "",
+      "score": 93,
+      "requirements": [
+        {
+          "id": "r-1-0",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-1-1",
+          "text": "Experience with PyTorch.",
+          "skill": "PyTorch",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        },
+        {
+          "id": "r-1-2",
+          "text": "Experience with AWS.",
+          "skill": "AWS",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-5",
+            "quote": "Shipped production workloads on AWS with automated model monitoring.",
+            "start": 331,
+            "end": 399,
+            "section": "experience",
+            "skills": [
+              "AWS"
+            ]
+          }
+        },
+        {
+          "id": "r-1-3",
+          "text": "Experience with Docker.",
+          "skill": "Docker",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        },
+        {
+          "id": "r-1-4",
+          "text": "Experience with Spark.",
+          "skill": "Spark",
+          "required": false,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        },
+        {
+          "id": "r-1-5",
+          "text": "Experience with SQL.",
+          "skill": "SQL",
+          "required": false,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-4",
+            "quote": "Designed SQL reporting pipelines over a PostgreSQL warehouse.",
+            "start": 269,
+            "end": 330,
+            "section": "experience",
+            "skills": [
+              "SQL"
+            ]
+          }
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with Python.\nExperience with PyTorch.\nExperience with AWS.\nExperience with Docker.\nNice to have\nExperience with Spark.\nExperience with SQL."
+    },
+    {
+      "id": "demo-2",
+      "company": "Layers",
+      "title": "Applied AI Engineer",
+      "location": "Rotterdam, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "AI Engineer",
+      "employment": "full-time",
+      "career_level": "unknown",
+      "workplace": "hybrid",
+      "provider": "sample",
+      "url": "",
+      "score": 85,
+      "requirements": [
+        {
+          "id": "r-2-0",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-2-1",
+          "text": "Experience with NLP.",
+          "skill": "NLP",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-8",
+            "quote": "Built a semantic search tool using embeddings, vector databases and natural language processing.",
+            "start": 538,
+            "end": 634,
+            "section": "projects",
+            "skills": [
+              "NLP",
+              "Embeddings",
+              "Vector databases"
+            ]
+          }
+        },
+        {
+          "id": "r-2-2",
+          "text": "Experience with Embeddings.",
+          "skill": "Embeddings",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-8",
+            "quote": "Built a semantic search tool using embeddings, vector databases and natural language processing.",
+            "start": 538,
+            "end": 634,
+            "section": "projects",
+            "skills": [
+              "NLP",
+              "Embeddings",
+              "Vector databases"
+            ]
+          }
+        },
+        {
+          "id": "r-2-3",
+          "text": "Experience with TensorFlow.",
+          "skill": "TensorFlow",
+          "required": false,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        },
+        {
+          "id": "r-2-4",
+          "text": "Experience with Azure.",
+          "skill": "Azure",
+          "required": false,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with Python.\nExperience with NLP.\nExperience with Embeddings.\nNice to have\nExperience with TensorFlow.\nExperience with Azure."
+    },
+    {
+      "id": "demo-3",
+      "company": "Forma",
+      "title": "Data Scientist, Product",
+      "location": "Amsterdam, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "Data Scientist",
+      "employment": "full-time",
+      "career_level": "unknown",
+      "workplace": "hybrid",
+      "provider": "sample",
+      "url": "",
+      "score": 64,
+      "requirements": [
+        {
+          "id": "r-3-0",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-3-1",
+          "text": "Experience with SQL.",
+          "skill": "SQL",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-4",
+            "quote": "Designed SQL reporting pipelines over a PostgreSQL warehouse.",
+            "start": 269,
+            "end": 330,
+            "section": "experience",
+            "skills": [
+              "SQL"
+            ]
+          }
+        },
+        {
+          "id": "r-3-2",
+          "text": "Experience with Statistics.",
+          "skill": "Statistics",
+          "required": true,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        },
+        {
+          "id": "r-3-3",
+          "text": "Experience with A/B testing.",
+          "skill": "A/B testing",
+          "required": false,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        },
+        {
+          "id": "r-3-4",
+          "text": "Experience with pandas.",
+          "skill": "pandas",
+          "required": false,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-9",
+            "quote": "Created interactive dashboards using Python, pandas and data visualization.",
+            "start": 635,
+            "end": 710,
+            "section": "projects",
+            "skills": [
+              "Python",
+              "pandas",
+              "Data visualization"
+            ]
+          }
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with Python.\nExperience with SQL.\nExperience with Statistics.\nNice to have\nExperience with A/B testing.\nExperience with pandas."
+    },
+    {
+      "id": "demo-4",
+      "company": "Orbit",
+      "title": "Data Analyst",
+      "location": "Eindhoven, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "Data Analyst",
+      "employment": "full-time",
+      "career_level": "unknown",
+      "workplace": "remote",
+      "provider": "sample",
+      "url": "",
+      "score": 93,
+      "requirements": [
+        {
+          "id": "r-4-0",
+          "text": "Experience with SQL.",
+          "skill": "SQL",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-4",
+            "quote": "Designed SQL reporting pipelines over a PostgreSQL warehouse.",
+            "start": 269,
+            "end": 330,
+            "section": "experience",
+            "skills": [
+              "SQL"
+            ]
+          }
+        },
+        {
+          "id": "r-4-1",
+          "text": "Experience with Data visualization.",
+          "skill": "Data visualization",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-9",
+            "quote": "Created interactive dashboards using Python, pandas and data visualization.",
+            "start": 635,
+            "end": 710,
+            "section": "projects",
+            "skills": [
+              "Python",
+              "pandas",
+              "Data visualization"
+            ]
+          }
+        },
+        {
+          "id": "r-4-2",
+          "text": "Experience with pandas.",
+          "skill": "pandas",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-9",
+            "quote": "Created interactive dashboards using Python, pandas and data visualization.",
+            "start": 635,
+            "end": 710,
+            "section": "projects",
+            "skills": [
+              "Python",
+              "pandas",
+              "Data visualization"
+            ]
+          }
+        },
+        {
+          "id": "r-4-3",
+          "text": "Experience with Tableau.",
+          "skill": "Tableau",
+          "required": false,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        },
+        {
+          "id": "r-4-4",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": false,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with SQL.\nExperience with Data visualization.\nExperience with pandas.\nNice to have\nExperience with Tableau.\nExperience with Python."
+    },
+    {
+      "id": "demo-5",
+      "company": "Parallel",
+      "title": "ML Platform Engineer",
+      "location": "Utrecht, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "ML Engineer",
+      "employment": "full-time",
+      "career_level": "unknown",
+      "workplace": "on-site",
+      "provider": "sample",
+      "url": "",
+      "score": 71,
+      "requirements": [
+        {
+          "id": "r-5-0",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-5-1",
+          "text": "Experience with Docker.",
+          "skill": "Docker",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        },
+        {
+          "id": "r-5-2",
+          "text": "Experience with Kubernetes.",
+          "skill": "Kubernetes",
+          "required": true,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        },
+        {
+          "id": "r-5-3",
+          "text": "Experience with AWS.",
+          "skill": "AWS",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-5",
+            "quote": "Shipped production workloads on AWS with automated model monitoring.",
+            "start": 331,
+            "end": 399,
+            "section": "experience",
+            "skills": [
+              "AWS"
+            ]
+          }
+        },
+        {
+          "id": "r-5-4",
+          "text": "Experience with PyTorch.",
+          "skill": "PyTorch",
+          "required": false,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        },
+        {
+          "id": "r-5-5",
+          "text": "Experience with Spark.",
+          "skill": "Spark",
+          "required": false,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with Python.\nExperience with Docker.\nExperience with Kubernetes.\nExperience with AWS.\nNice to have\nExperience with PyTorch.\nExperience with Spark."
+    },
+    {
+      "id": "demo-6",
+      "company": "Aperture",
+      "title": "Computer Vision Engineer",
+      "location": "The Hague, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "ML Engineer",
+      "employment": "part-time",
+      "career_level": "unknown",
+      "workplace": "hybrid",
+      "provider": "sample",
+      "url": "",
+      "score": 72,
+      "requirements": [
+        {
+          "id": "r-6-0",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-6-1",
+          "text": "Experience with PyTorch.",
+          "skill": "PyTorch",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        },
+        {
+          "id": "r-6-2",
+          "text": "Experience with Computer vision.",
+          "skill": "Computer vision",
+          "required": true,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        },
+        {
+          "id": "r-6-3",
+          "text": "Experience with Docker.",
+          "skill": "Docker",
+          "required": false,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        },
+        {
+          "id": "r-6-4",
+          "text": "Experience with AWS.",
+          "skill": "AWS",
+          "required": false,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-5",
+            "quote": "Shipped production workloads on AWS with automated model monitoring.",
+            "start": 331,
+            "end": 399,
+            "section": "experience",
+            "skills": [
+              "AWS"
+            ]
+          }
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with Python.\nExperience with PyTorch.\nExperience with Computer vision.\nNice to have\nExperience with Docker.\nExperience with AWS."
+    },
+    {
+      "id": "demo-7",
+      "company": "Harbour",
+      "title": "Junior Software Engineer",
+      "location": "Rotterdam, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "Software Engineer",
+      "employment": "full-time",
+      "career_level": "junior",
+      "workplace": "hybrid",
+      "provider": "sample",
+      "url": "",
+      "score": 100,
+      "requirements": [
+        {
+          "id": "r-7-0",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-7-1",
+          "text": "Experience with SQL.",
+          "skill": "SQL",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-4",
+            "quote": "Designed SQL reporting pipelines over a PostgreSQL warehouse.",
+            "start": 269,
+            "end": 330,
+            "section": "experience",
+            "skills": [
+              "SQL"
+            ]
+          }
+        },
+        {
+          "id": "r-7-2",
+          "text": "Experience with Docker.",
+          "skill": "Docker",
+          "required": false,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-3",
+            "quote": "Trained PyTorch models and deployed inference APIs with FastAPI and Docker.",
+            "start": 193,
+            "end": 268,
+            "section": "experience",
+            "skills": [
+              "PyTorch",
+              "Docker",
+              "FastAPI"
+            ]
+          }
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with Python.\nExperience with SQL.\nNice to have\nExperience with Docker."
+    },
+    {
+      "id": "demo-8",
+      "company": "Canal",
+      "title": "Senior Data Engineer",
+      "location": "Amsterdam, Netherlands",
+      "countries": [
+        "NL"
+      ],
+      "family": "Data Engineer",
+      "employment": "full-time",
+      "career_level": "senior",
+      "workplace": "remote",
+      "provider": "sample",
+      "url": "",
+      "score": 85,
+      "requirements": [
+        {
+          "id": "r-8-0",
+          "text": "Experience with Python.",
+          "skill": "Python",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-2",
+            "quote": "Built Python services for document search and retrieval-augmented generation.",
+            "start": 115,
+            "end": 192,
+            "section": "experience",
+            "skills": [
+              "Python",
+              "RAG"
+            ]
+          }
+        },
+        {
+          "id": "r-8-1",
+          "text": "Experience with SQL.",
+          "skill": "SQL",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-4",
+            "quote": "Designed SQL reporting pipelines over a PostgreSQL warehouse.",
+            "start": 269,
+            "end": 330,
+            "section": "experience",
+            "skills": [
+              "SQL"
+            ]
+          }
+        },
+        {
+          "id": "r-8-2",
+          "text": "Experience with AWS.",
+          "skill": "AWS",
+          "required": true,
+          "status": "met",
+          "tier": "vocabulary",
+          "evidence": {
+            "id": "ev-5",
+            "quote": "Shipped production workloads on AWS with automated model monitoring.",
+            "start": 331,
+            "end": 399,
+            "section": "experience",
+            "skills": [
+              "AWS"
+            ]
+          }
+        },
+        {
+          "id": "r-8-3",
+          "text": "Experience with Spark.",
+          "skill": "Spark",
+          "required": false,
+          "status": "not_verified",
+          "tier": "unverified",
+          "evidence": null
+        }
+      ],
+      "first_seen": "2026-09-14",
+      "description": "Requirements\nExperience with Python.\nExperience with SQL.\nExperience with AWS.\nNice to have\nExperience with Spark."
+    }
+  ]
+}

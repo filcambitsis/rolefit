@@ -1,11 +1,11 @@
 # Retention and account isolation
 
-Original uploads are read with a 5 MB cap and closed in a finally block on both success and failure. The temporary upload is removed when closed. No original file is copied into application storage. Text and verified evidence are retained in the application database for matching. Uploading another CV replaces the prior CV and cascades its evidence deletion.
+Uploads have a 5 MB limit. Original files are closed and discarded after parsing, including on failure. The database retains extracted text and exact evidence passages for matching. Uploading a replacement CV deletes the previous CV and its evidence. Deleting a CV removes both; deleting account data also removes preferences and bookmarks. Supabase identity deletion remains a separate operation.
 
-Every CV query and mutation is scoped to the Supabase UUID established by a verified RS256/ES256 token. Application data is in our own database. Supabase handles authentication only. Production rejects development authentication. Development authentication requires a loopback socket peer, localhost URL and local Origin. The normal run command also disables proxy-header trust. Containers require real authentication; a bridge-network peer cannot use the development bypass.
+All CV queries and mutations are scoped to the authenticated user. Production uses verified Supabase JWTs; local development access is restricted to loopback peers, localhost URLs and local origins. Do not expose development authentication publicly.
 
-LLM CV cache entries are scoped by user ID and content hash; no cross-user cache reuse. Deleting a CV removes its raw text, evidence and user-scoped extraction cache and legacy adjudication caches belonging to its CV. Replacement also clears those caches. Account-data deletion also removes saved/skipped decisions and preferences. Supabase account deletion is an independent identity-provider operation.
+Extraction and matching are rules-based and make no model-provider calls. The cleanup migration removes the old model-output cache and budget tables, including any legacy CV quotations stored there. Backups made before cleanup may still contain them.
 
-The browser demo keeps pasted CV text only in memory. It stores only sample saved-job IDs and preferences in local storage. Browser refresh discards the CV text. Public fixtures must be fictional, or explicitly anonymized and approved. The bundled sample CV (`data/sample-cv.txt`) is fictional.
+The standalone demo contains only fixed fictional data. It accepts no personal CV uploads and stores only preferences and saved demo-job IDs in browser local storage.
 
-Production operators must document database backup retention and purge periods before accepting real CVs. Do not log upload bodies, bearer tokens or provider keys. Configure a request-body limit at the reverse proxy as well as the application file-size guard. If model extraction is enabled, CV text is sent to the configured model provider; disclose that provider and its retention terms to users before launch.
+Before public deployment, define database backup retention and deletion procedures, configure request-size limits, and verify authentication and account isolation in the deployed environment. Never commit private CVs, database copies, credentials or logs containing uploaded text.

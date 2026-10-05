@@ -1,61 +1,35 @@
 # Portfolio validation
 
-Checked locally on 3–4 October 2026. This documents engineering verification, not scientific validation of candidate suitability.
+This records engineering verification, not scientific validation of candidate suitability. Matching accuracy remains **partially reviewed**.
 
-## Three private CVs
+## Earlier checks
 
-Three user-provided, text-based PDFs (one, two and one pages) parsed successfully. Exact source-offset checks passed for all extracted passages. Real CV files, names, contact details and quotes are not included in this document or public fixtures.
+Earlier development notes recorded successful parsing of three private text-based CVs and exploratory AI-assisted review of several jobs per CV. This was not an independent human-rating study. Private files and their contents are not included in fixtures or this document.
 
-AI-assisted inspection covered five jobs for each profile, including high-coverage results, less relevant roles and a posting with no extracted requirements. Selection was exploratory rather than random. It found:
+Those checks found missing requirement headings, overclaimed experience, ambiguous skill aliases and stale extracted skill tags. Regression tests cover these issues. Completed related computing degrees are now recognised; experience, proficiency and complex requirements remain conservative.
 
-- Missing qualification headings inflated coverage by omitting constraints.
-- A standalone employment date range incorrectly satisfied specialised work experience.
-- A ReAct agent mention could be confused with the React framework.
-- Newly added skills were absent from old stored evidence.
-- Skills listed in a CV did not establish seniority, proficiency or the full conditions of a compound requirement.
+The latest user walkthrough reviewed one Databricks backend posting. The completed AI bachelor’s was correctly linked to a related-degree requirement; SQL was a basic keyword match, and specialised experience remained unverified. The user chose not to review another job. This does not establish accuracy across the whole corpus.
 
-Fixes add section boundaries, preserve unverified constraints, refresh saved evidence, distinguish ReAct, and leave degree and experience constraints for manual review. The UI now states the limits of skill mentions, flags senior titles and limited extraction, and shows no score when extraction produces no requirements.
+## Repeatable verification
 
-Some mismatches remain: alternatives, compound requirements, incomplete vocabulary and uncommon job headings. This is why the product reports requirement coverage rather than suitability. A user's own review of relevance remains valuable; no independent human-rating study has been performed.
+Run `make check` for:
 
-## Automated checks
+- Demo snapshot freshness against Python extraction and matching.
+- Python lint and regression tests, including fresh SQLite migrations and upgrades from the earlier schema.
+- Frontend fixture/preferences checks, TypeScript, ESLint and production build.
 
-Run `make check` to repeat:
-- Python lint and 45 regression tests.
-- Frontend scoring-contract and demo-employment checks.
-- TypeScript checks, ESLint and production build.
+Regression coverage includes exact evidence, rejected forged spans, related degrees and month-based completion dates, negated skills, score weighting, bad uploads, CV replacement/deletion, user isolation, role aliases, saved jobs, source failure handling and localhost-only development authentication.
 
-Tests include required-only/preferred-only/empty scoring, consistent rounding, exact evidence, forged-span rejection, user isolation, bad uploads, CV replacement/deletion, legacy cache cleanup, stale CV extraction, negation, skill aliases, retired preferences, crawler failure handling and local-development authentication restrictions.
+The cleanup upgrade removes model caches/budgets and skipped decisions, preserves CVs/bookmarks, and merges old AI preference names. New installs no longer need the vector extension. PostgreSQL migrations are checked by GitHub CI; a local SQLite pass is not a claim that a new remote CI run passed.
 
-SQLite migrations were verified on a fresh database and applied to the existing database after a local backup, and `alembic check` reported no pending schema differences. PostgreSQL migrations are covered by the repository CI workflow; no new remote CI run is claimed until these changes are pushed.
+## Browser verification
 
-## Public job data
+Cleanup checks passed 133 backend tests, frontend checks and a production build. A disposable API smoke test covered upload, matching, job details, save/unsave and CV deletion. Browser checks confirmed connected CV input and matching, merged preferences, job details, the fixed sample demo and mobile navigation/cards at 390px. The local database upgrade preserved existing user, CV, evidence and job counts; a backup was made first. PostgreSQL migration verification awaits the next CI run.
 
-The refreshed corpus contained 245 eligible jobs from the configured public boards during this check. Counts change with time. Three old endpoints (Lever Netflix, Lever Welocalize and Ashby Anthropic) returned 404s and had no open stored jobs; they were removed from the active seed list. The remaining sources refreshed without failures.
+Previous checks covered connected matching, degree evidence, save/unsave, search, empty results and responsive layouts. The cleanup removes the high-coverage tab and skip/restore controls and uses fixed demo results generated by the backend. Upload and deletion are exercised with fictional test data, not by deleting the user's CV.
 
-Six application URLs, two per provider, returned HTTP 200. This is a spot check, not a guarantee that every posting remains open. Failed boards preserve existing jobs; partial failures are reported and return a nonzero exit code.
-
-## Browser checks
-
-- Demo discovery, evidence detail, save/unsave, skip/restore, preferences and empty results.
-- Connected upload of the fictional CV, preferences, matching, details and save/skip.
-- No-requirements job displays N/A and an explanation.
-- Backend unavailable state displays a clear retry message.
-- Desktop at 1440 px and mobile at 390 px.
-- Fixed mobile horizontal overflow; measured document width matches viewport width.
-- Hidden mobile navigation no longer exposes off-screen controls.
-- Screenshots contain only fictional demo content.
-
-Default local startup uses frontend 3002 and API 8000 with matching CORS settings and polling enabled for macOS file-watcher limits.
+Current corpus totals belong in the output of `make refresh`; they are not fixed validation claims. Failed sources retain existing jobs. Some postings still have no extracted requirements and therefore no score. Application-link checks are spot checks only.
 
 ## Release boundary
 
-Ready for a local portfolio demonstration after the documented checks pass. Public hosting, production authentication, backup-retention operations and a remote CI result are separate from these local checks.
-
-## Netherlands-only update (5 October 2026)
-
-The API enforces Netherlands availability for matches, job details and saving. Legacy country preferences are ignored, and old foreign bookmarks are hidden. Tests cover foreign/unknown remote locations and multi-location Dutch jobs. The source list now contains Eye Security, DataSnipper, IMC and TomTom (Lever EU). Refresh yielded 11 eligible listings, all with extracted requirements after adding missing section-heading variants. Desktop (1440px) and mobile (390px) layouts, evidence, simplified preferences, saving and shortlist navigation were checked; screenshots were refreshed.
-
-## Practical preferences update
-
-Added Software Engineer and Data Engineer, conservative title-based career levels, and actual work-arrangement filtering. The refresh returned 22 eligible Dutch listings (4 without extracted requirements, displayed without scores). Backend regressions cover combined filters, unknown arrangements and invalid levels; demo checks cover the same title rules. The CV preview now opens on demand and does not label copied text as independently verified.
+A successful local run and checks support a local portfolio demonstration. Broader accuracy assessment, hosted authentication/operations, and the result of the next remote CI run remain separate work. Do not claim a scientifically validated recommendation system.

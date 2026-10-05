@@ -148,7 +148,7 @@ def test_ranking_and_retired_family_preferences(client, db, job):
     db.commit()
     jobs = client.post("/matches").json()["jobs"]
     assert [j["id"] for j in jobs] == [job.id]
-    assert family("AI & Technology Consultant") == "AI Consultant"
+    assert family("AI & Technology Consultant") == "AI Consulting & Solutions"
 
 
 def test_skill_names_and_distinct_technologies():
@@ -213,42 +213,6 @@ def test_old_cv_refreshes_without_reupload(client, db, job, entrypoint):
     assert cv.prompt_version == PROMPT_VERSION
     assert all(raw[e["start"] : e["end"]] == e["quote"] for e in result["evidence"])
     assert client.post("/matches").status_code == 200
-
-
-def test_legacy_cache_cleanup_and_user_isolation(client, db):
-    from rolefit.models import CV, ExtractionCache
-
-    for action in ["replace", "delete_cv", "delete_user"]:
-        client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
-        cv = db.scalar(select(CV).where(CV.user_id == "alice"))
-        key = "legacy-" + action
-        db.add(
-            ExtractionCache(
-                key=key,
-                scope="adjudication:" + cv.id,
-                model_version="old",
-                prompt_version="evidence-v1",
-                payload={"evidence_quote": "Private passage"},
-            )
-        )
-        db.commit()
-        if action == "replace":
-            db.add(
-                ExtractionCache(
-                    key="other-user",
-                    scope="bob",
-                    model_version="old",
-                    prompt_version="evidence-v1",
-                    payload={},
-                )
-            )
-            db.commit()
-            response = client.post("/cv", files={"file": ("new.txt", CV_TEXT + "Updated.")})
-        else:
-            response = client.delete("/cv" if action == "delete_cv" else "/me")
-        assert response.status_code in (200, 204)
-        assert db.get(ExtractionCache, key) is None
-        assert db.get(ExtractionCache, "other-user") is not None
 
 
 @pytest.mark.parametrize(
@@ -465,10 +429,10 @@ def test_legacy_internship_level_is_removed(client):
 @pytest.mark.parametrize(
     "title,expected",
     [
-        ("AI & Technology Consultant", "AI Consultant"),
+        ("AI & Technology Consultant", "AI Consulting & Solutions"),
         ("Senior Data Analytics Consultant", "Data Consultant"),
         ("Digital Transformation Consultant", "Technology Consultant"),
-        ("Machine Learning Advisor", "AI Consultant"),
+        ("Machine Learning Advisor", "AI Consulting & Solutions"),
         ("Recruitment Consultant", None),
     ],
 )
@@ -521,12 +485,12 @@ def test_all_role_preferences_are_accepted(client):
         ("AI Automation Specialist", "AI & Automation Specialist"),
         ("Workflow Automation Engineer", "AI & Automation Specialist"),
         ("RPA Engineer", "AI & Automation Specialist"),
-        ("AI Solutions Engineer", "AI Solutions & Implementation"),
+        ("AI Solutions Engineer", "AI Consulting & Solutions"),
         ("Junior Solutions Architect", "Solutions Engineer"),
-        ("AI Solutions Consultant", "AI Solutions & Implementation"),
-        ("AI Implementation Consultant", "AI Solutions & Implementation"),
-        ("Data & AI Consultant", "AI Consultant"),
-        ("AI Adoption Specialist", "AI Solutions & Implementation"),
+        ("AI Solutions Consultant", "AI Consulting & Solutions"),
+        ("AI Implementation Consultant", "AI Consulting & Solutions"),
+        ("Data & AI Consultant", "AI Consulting & Solutions"),
+        ("AI Adoption Specialist", "AI Consulting & Solutions"),
         ("GenAI Engineer", "AI Engineer"),
         ("LLM Engineer", "AI Engineer"),
         ("Applied AI Engineer", "AI Engineer"),
@@ -564,18 +528,16 @@ def test_new_role_skills():
 def test_unspecified_employment_can_be_filtered(client, job, db):
     client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
     job.employment = "unknown"
-    job.family = "AI Solutions & Implementation"
+    job.family = "AI Consulting & Solutions"
     db.commit()
     assert (
         client.put(
-            "/preferences", json={"families": ["AI Solutions & Implementation"], "employment": ["unknown"]}
+            "/preferences", json={"families": ["AI Consulting & Solutions"], "employment": ["unknown"]}
         ).status_code
         == 200
     )
     assert len(client.post("/matches").json()["jobs"]) == 1
-    client.put(
-        "/preferences", json={"families": ["AI Solutions & Implementation"], "employment": ["full-time"]}
-    )
+    client.put("/preferences", json={"families": ["AI Consulting & Solutions"], "employment": ["full-time"]})
     assert client.post("/matches").json()["jobs"] == []
 
 
@@ -655,3 +617,29 @@ def test_degree_month_ranges(monkeypatch, date_range, status, tier):
     assert result["status"] == status
     assert result["tier"] == tier
     assert matching.requirement_score([result]) == (100 if status == "met" else 0)
+
+
+def test_merged_role_aliases_are_preserved(client):
+    response = client.put(
+        "/preferences", json={"families": ["AI Consultant", "AI Solutions & Implementation"]}
+    )
+    assert response.status_code == 200
+    assert response.json()["families"] == ["AI Consulting & Solutions"]
+
+
+def test_skipping_is_retired_and_payloads_are_trimmed(client, job):
+    assert client.put(f"/jobs/{job.id}/decision", json={"state": "skipped"}).status_code == 422
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    assert "skipped" not in client.get("/me").json()
+    payload = client.post("/matches").json()["jobs"][0]
+    assert not {"required_coverage", "employment_provenance", "method"} & payload.keys()
+
+
+def test_all_legacy_families_fit_after_merging(client):
+    from rolefit.normalization import FAMILIES
+
+    families = [name for name in FAMILIES if name != "AI Consulting & Solutions"]
+    families += ["AI Consultant", "AI Solutions & Implementation"]
+    response = client.put("/preferences", json={"families": families})
+    assert response.status_code == 200
+    assert set(response.json()["families"]) == set(FAMILIES)

@@ -1,0 +1,155 @@
+[
+  [
+    "Meridian",
+    "AI Engineer, Search & Discovery",
+    "Amsterdam, Netherlands",
+    "NL",
+    "AI Engineer",
+    "hybrid",
+    [
+      "Python",
+      "RAG",
+      "FastAPI",
+      "Docker"
+    ],
+    [
+      "Kubernetes",
+      "Embeddings"
+    ]
+  ],
+  [
+    "Arc",
+    "Machine Learning Engineer",
+    "Utrecht, Netherlands",
+    "NL",
+    "ML Engineer",
+    "remote",
+    [
+      "Python",
+      "PyTorch",
+      "AWS",
+      "Docker"
+    ],
+    [
+      "Spark",
+      "SQL"
+    ]
+  ],
+  [
+    "Layers",
+    "Applied AI Engineer",
+    "Rotterdam, Netherlands",
+    "NL",
+    "AI Engineer",
+    "hybrid",
+    [
+      "Python",
+      "NLP",
+      "Embeddings"
+    ],
+    [
+      "TensorFlow",
+      "Azure"
+    ]
+  ],
+  [
+    "Forma",
+    "Data Scientist, Product",
+    "Amsterdam, Netherlands",
+    "NL",
+    "Data Scientist",
+    "hybrid",
+    [
+      "Python",
+      "SQL",
+      "Statistics"
+    ],
+    [
+      "A/B testing",
+      "pandas"
+    ]
+  ],
+  [
+    "Orbit",
+    "Data Analyst",
+    "Eindhoven, Netherlands",
+    "NL",
+    "Data Analyst",
+    "remote",
+    [
+      "SQL",
+      "Data visualization",
+      "pandas"
+    ],
+    [
+      "Tableau",
+      "Python"
+    ]
+  ],
+  [
+    "Parallel",
+    "ML Platform Engineer",
+    "Utrecht, Netherlands",
+    "NL",
+    "ML Engineer",
+    "on-site",
+    [
+      "Python",
+      "Docker",
+      "Kubernetes",
+      "AWS"
+    ],
+    [
+      "PyTorch",
+      "Spark"
+    ]
+  ],
+  [
+    "Aperture",
+    "Computer Vision Engineer",
+    "The Hague, Netherlands",
+    "NL",
+    "ML Engineer",
+    "hybrid",
+    [
+      "Python",
+      "PyTorch",
+      "Computer vision"
+    ],
+    [
+      "Docker",
+      "AWS"
+    ]
+  ],
+  [
+    "Harbour",
+    "Junior Software Engineer",
+    "Rotterdam, Netherlands",
+    "NL",
+    "Software Engineer",
+    "hybrid",
+    [
+      "Python",
+      "SQL"
+    ],
+    [
+      "Docker"
+    ]
+  ],
+  [
+    "Canal",
+    "Senior Data Engineer",
+    "Amsterdam, Netherlands",
+    "NL",
+    "Data Engineer",
+    "remote",
+    [
+      "Python",
+      "SQL",
+      "AWS"
+    ],
+    [
+      "Spark"
+    ]
+  ]
+]

@@ -9,8 +9,6 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from rolefit import auth
 from rolefit.config import Settings
-from rolefit.extraction import StructuredCV, cached_call
-from rolefit.models import Budget
 
 
 def test_production_settings_never_accept_dev_auth():
@@ -63,37 +61,6 @@ def test_jwt_signature_issuer_audience_expiry(monkeypatch, db):
         assert caught.value.status_code == 401
     with pytest.raises(HTTPException):
         auth.current_user(None, None, db)
-
-
-def test_budget_cap_stops_before_remote_call(db, monkeypatch):
-    from rolefit import extraction
-
-    config = SimpleNamespace(
-        llm_api_key="test-only",
-        llm_model="test-model",
-        llm_input_usd_per_million=5,
-        llm_output_usd_per_million=20,
-        llm_budget_usd=0,
-    )
-    monkeypatch.setattr(extraction, "settings", lambda: config)
-
-    def forbidden(*args, **kwargs):
-        raise AssertionError("Budget exhaustion must prevent a network call")
-
-    monkeypatch.setattr(extraction.httpx, "post", forbidden)
-    db.add(Budget(id=1, spent_usd=0))
-    db.commit()
-    with pytest.raises(ValueError, match="budget exhausted"):
-        cached_call(db, "alice", "cv", "text", StructuredCV, "structure")
-
-
-def test_schema_rejects_extra_fields_and_bad_sections():
-    from pydantic import ValidationError
-
-    with pytest.raises(ValidationError):
-        StructuredCV.model_validate(
-            {"items": [{"quote": "invented", "section": "instructions", "score": 99}]}
-        )
 
 
 @pytest.mark.parametrize(

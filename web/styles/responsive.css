@@ -1,0 +1,580 @@
+/* Increase primary reading sizes without changing the compact workspace rhythm. */
+.job-title {
+  font-size: 17px;
+}
+.job-meta,
+.job-skills > span,
+.company-line,
+.fit-summary > div > strong,
+.text-button,
+.search-box input,
+.filter-button,
+.button {
+  font-size: 14px;
+}
+.fit-summary > div > span,
+.company-line span,
+.job-meta .workplace-tag,
+.page-heading p,
+.panel > p,
+.preference-section > p,
+.requirement-title strong,
+.requirement blockquote,
+.job-description p {
+  font-size: 13px;
+}
+.job-skills > span,
+.fit-summary > div > span,
+.requirement small,
+.requirement.missing p,
+.result-count,
+.result-count > span:last-child,
+.sort-label select {
+  font-size: 12px;
+}
+.job-footer .text-button {
+  white-space: nowrap;
+}
+.role-options strong,
+.choice-chips > button,
+.preference-section select,
+.preference-section > label {
+  font-size: 14px;
+}
+@media (min-width: 1550px) {
+  main {
+    padding: 50px 60px;
+  }
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+  .sidebar {
+    width: 255px;
+  }
+  .main-shell {
+    margin-left: 255px;
+  }
+  .job-card {
+    padding: 26px 28px 0;
+  }
+  .job-title {
+    font-size: 19px;
+  }
+  .job-meta {
+    font-size: 13px;
+  }
+  .job-footer {
+    padding: 16px 0;
+  }
+}
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 210px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .main-shell {
+    margin-left: 210px;
+  }
+  main {
+    padding: 35px 28px;
+  }
+  .topbar {
+    padding: 0 28px;
+  }
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .page-heading {
+    align-items: flex-start;
+  }
+  .page-heading > .button {
+    margin-top: 24px;
+  }
+  .job-card {
+    padding: 20px 18px 0;
+  }
+  .fit-summary > div > span {
+    font-size: 11px;
+  }
+  .job-footer {
+    gap: 6px;
+  }
+  .preferences-layout {
+    grid-template-columns: minmax(0, 850px);
+    gap: 25px;
+  }
+  .role-options {
+    grid-template-columns: 1fr;
+  }
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .panel {
+    padding: 23px;
+  }
+  .job-meta {
+    gap: 10px;
+    font-size: 12px;
+  }
+  .company-line span {
+    font-size: 11px;
+  }
+  .job-skills > span {
+    font-size: 11px;
+  }
+  .job-title {
+    font-size: 16px;
+  }
+}
+@media (max-width: 1020px) {
+  .sidebar {
+    width: 200px;
+  }
+  .main-shell {
+    margin-left: 200px;
+  }
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .page-heading > .button {
+    font-size: 12px;
+  }
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .evidence-list {
+    max-height: 500px;
+  }
+  .preferences-layout {
+    grid-template-columns: minmax(0, 850px);
+  }
+  .role-options {
+    grid-template-columns: 1fr 1fr;
+  }
+  .job-title {
+    font-size: 18px;
+  }
+  .job-meta {
+    font-size: 13px;
+  }
+  .job-skills > span {
+    font-size: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .sidebar {
+    transform: translateX(-100%);
+    visibility: hidden;
+
+    width: 238px;
+  }
+  .sidebar-open {
+    visibility: visible;
+    transform: translateX(0);
+  }
+  .nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    background: #111b3c66;
+    backdrop-filter: blur(2px);
+  }
+  .main-shell {
+    margin-left: 0;
+  }
+  .topbar {
+    height: 65px;
+    padding: 0 20px;
+  }
+  .mobile-toggle {
+    display: flex;
+    margin-left: -8px;
+  }
+  .breadcrumb {
+    gap: 9px;
+    font-size: 11px;
+  }
+  .breadcrumb > span {
+    display: none;
+  }
+  .breadcrumb > svg {
+    display: none;
+  }
+  .page-heading {
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  .page-heading > .button {
+    margin-top: 0;
+    padding: 11px 15px;
+  }
+  .page-heading p {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  main {
+    padding: 29px 20px 20px;
+  }
+  h1 {
+    font-size: 30px;
+    letter-spacing: -1.1px;
+  }
+  .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.4px;
+  }
+  .result-count {
+    font-size: 11px;
+  }
+  .result-count > span:last-child {
+    font-size: 10px;
+  }
+  .sort-label select {
+    font-size: 12px;
+  }
+  .job-card {
+    padding: 20px 17px 0;
+  }
+  .job-title {
+    font-size: 16px;
+  }
+  .job-meta {
+    font-size: 12px;
+    gap: 10px;
+    margin: 16px 0 13px;
+  }
+  .job-skills {
+    gap: 5px;
+    margin-bottom: 17px;
+  }
+  .job-skills > span {
+    font-size: 11px;
+  }
+  .job-footer {
+    padding: 14px 0;
+  }
+  .fit-summary {
+    gap: 8px;
+  }
+  .fit-summary > div > strong {
+    font-size: 12px;
+  }
+  .fit-summary > div > span {
+    font-size: 10px;
+    max-width: 170px;
+  }
+  .job-footer .text-button {
+    font-size: 12px;
+    gap: 4px;
+  }
+  .score {
+    height: 39px;
+    width: 39px;
+  }
+  .score > span {
+    font-size: 12px;
+  }
+  .company-mark {
+    width: 39px;
+    height: 39px;
+    font-size: 22px;
+  }
+  .company-line {
+    font-size: 12px;
+  }
+  .company-line span {
+    font-size: 10px;
+  }
+  .toast {
+    left: 50%;
+    min-width: 280px;
+    font-size: 12px;
+    max-width: calc(100vw - 32px);
+  }
+  .panel,
+  .preferences-panel {
+    padding: 22px;
+  }
+  .panel h2 {
+    font-size: 21px;
+  }
+  .role-options {
+    grid-template-columns: 1fr;
+  }
+  .form-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 20px;
+  }
+  .form-footer .button {
+    width: 100%;
+  }
+  .choice-chips > button {
+    font-size: 12px;
+  }
+  .detail-topbar {
+    padding: 15px 20px;
+  }
+  .detail-content {
+    padding: 24px;
+  }
+  .detail-content h1 {
+    font-size: 26px;
+  }
+  .detail-score {
+    gap: 15px;
+    padding: 18px;
+  }
+  .score-large {
+    width: 70px;
+    height: 70px;
+  }
+  .score-large > span {
+    font-size: 23px;
+  }
+  .score-large small {
+    font-size: 6px;
+  }
+  .detail-score h2 {
+    font-size: 16px;
+  }
+  .detail-score p {
+    font-size: 11px;
+  }
+  .detail-score .eyebrow {
+    font-size: 8px;
+  }
+  .breakdown-title h2 {
+    font-size: 18px;
+  }
+  .breakdown-title {
+    gap: 10px;
+  }
+  .breakdown-title span {
+    font-size: 10px;
+  }
+  .requirement-title {
+    align-items: flex-start;
+  }
+  .requirement-title strong {
+    font-size: 13px;
+  }
+  .requirement blockquote {
+    font-size: 12px;
+  }
+  .detail-actions {
+    padding: 15px 20px;
+    gap: 15px;
+  }
+  .detail-actions .button {
+    font-size: 12px;
+    padding: 11px 13px;
+  }
+  .demo-apply {
+    font-size: 10px;
+    flex: 1;
+    max-width: 130px;
+    text-align: right;
+  }
+  .detail-actions .primary {
+    flex: 1;
+  }
+  .preferences-panel .preference-section:last-of-type {
+    border: 0;
+  }
+  .auth-card {
+    margin: 20px auto;
+    padding: 27px;
+  }
+  .search-box input {
+    font-size: 13px;
+  }
+  .filter-button {
+    font-size: 13px;
+  }
+  .job-description p {
+    font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* Keep the score label centered even inside the compact fit summary. */
+.fit-summary .score > span {
+  display: flex;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: 13px;
+  color: #536ed0;
+}
+/* Secondary copy remains comfortably readable on the light canvas. */
+.page-heading p,
+.job-meta,
+.fit-summary > div > span,
+.result-count,
+.sort-label select {
+  color: #69768e;
+}
+.panel > p,
+.preference-section > p,
+.requirement blockquote,
+.job-description p {
+  font-size: 14px;
+  color: #64758e;
+}
+.eyebrow {
+  font-size: 11px;
+}
+.workspace-label {
+  font-size: 11px;
+}
+.company-line span,
+.result-count,
+.result-count > span:last-child {
+  font-size: 12px;
+}
+.job-meta {
+  font-size: 14px;
+}
+.privacy-note p {
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .eyebrow {
+    font-size: 10px;
+  }
+  .job-meta {
+    font-size: 12px;
+  }
+  .job-title {
+    font-size: 17px;
+  }
+  .fit-summary > div > span {
+    font-size: 11px;
+  }
+  .result-count > span:last-child {
+    font-size: 11px;
+  }
+}
+
+/* Let the sorting control wrap instead of widening narrow screens. */
+.results-column {
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .results-toolbar {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .sort-label {
+    margin-left: auto;
+    padding-bottom: 10px;
+  }
+  .fit-summary {
+    min-width: 0;
+  }
+  .fit-summary > div {
+    min-width: 0;
+  }
+}
+
+.demo-disclaimer {
+  margin: 32px 0 0;
+  color: #717b8e;
+  font-size: 12px;
+}
+
+/* Keep the main tasks in one readable column. */
+.workspace-grid,
+.form-grid {
+  max-width: 980px;
+}
+.cv-preview summary {
+  cursor: pointer;
+  font-weight: 500;
+  padding: 12px 0;
+}
+.cv-preview > p {
+  margin-top: 12px;
+}
+.cv-preview .evidence-list {
+  max-height: 360px;
+  padding: 0 12px;
+  border-left: 2px solid #e4e8f0;
+}
+.cv-preview .evidence-list p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+.panel,
+.job-card {
+  border-radius: 6px;
+  box-shadow: none;
+}
+.page-heading h1 {
+  font-size: 28px;
+  letter-spacing: -0.6px;
+}
+
+/* Plain scores and compact controls keep the focus on the job details. */
+.score,
+.score-large {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #f7f8fa;
+}
+.score-large {
+  width: 70px;
+  height: 50px;
+}
+.score-large > span {
+  flex-direction: row;
+  font-size: 22px;
+}
+.score-large small {
+  font-size: 12px;
+  margin: 0 0 0 2px;
+}
+.detail-score {
+  background: #fafafa;
+  border-radius: 4px;
+  padding: 16px;
+}
+.detail-score .eyebrow {
+  display: none;
+}
+.detail-score p {
+  font-size: 12px;
+  color: #64758e;
+}
+.role-options {
+  gap: 8px;
+}
+.role-options > button {
+  padding: 12px;
+  border-radius: 4px;
+}
+.preference-section {
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+}
+.primary,
+.detail-panel,
+.toast {
+  box-shadow: none;
+}

@@ -102,19 +102,3 @@ class CrawlRun(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     report: Mapped[dict] = mapped_column(JSON, default=dict)
-
-
-class ExtractionCache(Base):
-    __tablename__ = "extraction_cache"
-    key: Mapped[str] = mapped_column(String(64), primary_key=True)
-    scope: Mapped[str] = mapped_column(String(80), index=True)
-    model_version: Mapped[str] = mapped_column(String(100))
-    prompt_version: Mapped[str] = mapped_column(String(50))
-    payload: Mapped[dict] = mapped_column(JSON)
-    cost_usd: Mapped[float] = mapped_column(Float, default=0)
-
-
-class Budget(Base):
-    __tablename__ = "llm_budget"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    spent_usd: Mapped[float] = mapped_column(Float, default=0)

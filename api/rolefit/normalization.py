@@ -20,7 +20,7 @@ FAMILIES = [
     "Solutions Engineer",
     "Product Analyst",
     "Business & Technology Analyst",
-    "Product Owner",
+    "AI Solutions & Implementation",
 ]
 
 
@@ -42,7 +42,9 @@ def family(title: str) -> str | None:
         re.search(r"\bai\b|artificial intelligence|machine learning|gen\s?ai|generative|\bllm\b", value)
     )
     if re.search(r"\bproduct owner\b", value):
-        return "Product Owner"
+        return None
+    if ai and re.search(r"solutions?|implementation|adoption", value):
+        return "AI Solutions & Implementation"
     if re.search(r"\bproduct analyst\b", value):
         return "Product Analyst"
     if re.search(r"\b(?:business|technology|solutions?) analyst\b", value):

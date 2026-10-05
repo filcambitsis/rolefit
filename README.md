@@ -154,11 +154,11 @@ Preferences use broad groups rather than separate filters for every title varian
 | --- | --- |
 | AI Engineer | Applied AI, GenAI, LLM Engineer |
 | AI & Automation Specialist | AI Specialist, Workflow Automation, RPA Engineer |
-| AI Consultant | AI Solutions, Implementation, Adoption, Data & AI Consultant |
+| AI Consultant | AI Transformation, Data & AI Consultant |
 | Technology Consultant | Digital Transformation, Innovation Consultant |
 | Solutions Engineer | Solutions Engineer, Junior Solutions Architect |
 | Product Analyst | AI / Technical Product Analyst |
 | Business & Technology Analyst | Business Analyst, Technology Analyst, Solutions Analyst |
-| Product Owner | Junior / Technical / Data Product Owner |
+| AI Solutions & Implementation | AI Solutions Engineer, AI Implementation Consultant, AI Adoption Specialist |
 
 Existing data, ML and software groups remain available. Industrial/PLC and QA test automation are excluded. Seniority is a separate filter: adding architect titles does not label them junior. Sources are refreshed by `make refresh`; support for a group does not guarantee a current vacancy. Existing saved filters stay unchanged—reset preferences to include all new groups and unspecified employment.

@@ -56,7 +56,7 @@ export const families = [
   "Solutions Engineer",
   "Product Analyst",
   "Business & Technology Analyst",
-  "Product Owner",
+  "AI Solutions & Implementation",
 ];
 export const careerLevels = [
   ["junior", "Junior / graduate"],

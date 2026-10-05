@@ -521,12 +521,12 @@ def test_all_role_preferences_are_accepted(client):
         ("AI Automation Specialist", "AI & Automation Specialist"),
         ("Workflow Automation Engineer", "AI & Automation Specialist"),
         ("RPA Engineer", "AI & Automation Specialist"),
-        ("AI Solutions Engineer", "Solutions Engineer"),
+        ("AI Solutions Engineer", "AI Solutions & Implementation"),
         ("Junior Solutions Architect", "Solutions Engineer"),
-        ("AI Solutions Consultant", "AI Consultant"),
-        ("AI Implementation Consultant", "AI Consultant"),
+        ("AI Solutions Consultant", "AI Solutions & Implementation"),
+        ("AI Implementation Consultant", "AI Solutions & Implementation"),
         ("Data & AI Consultant", "AI Consultant"),
-        ("AI Adoption Specialist", "AI Consultant"),
+        ("AI Adoption Specialist", "AI Solutions & Implementation"),
         ("GenAI Engineer", "AI Engineer"),
         ("LLM Engineer", "AI Engineer"),
         ("Applied AI Engineer", "AI Engineer"),
@@ -537,7 +537,7 @@ def test_all_role_preferences_are_accepted(client):
         ("Technical Business Analyst", "Business & Technology Analyst"),
         ("Solutions Analyst", "Business & Technology Analyst"),
         ("Innovation Consultant", "Technology Consultant"),
-        ("Junior Product Owner - AI Products", "Product Owner"),
+        ("Junior Product Owner - AI Products", None),
         ("Industrial Automation Engineer", None),
         ("QA Test Automation Engineer", None),
         ("Technical Support Specialist (AI First)", None),
@@ -564,14 +564,14 @@ def test_new_role_skills():
 def test_unspecified_employment_can_be_filtered(client, job, db):
     client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
     job.employment = "unknown"
-    job.family = "Product Owner"
+    job.family = "AI Solutions & Implementation"
     db.commit()
     assert (
         client.put(
-            "/preferences", json={"families": ["Product Owner"], "employment": ["unknown"]}
+            "/preferences", json={"families": ["AI Solutions & Implementation"], "employment": ["unknown"]}
         ).status_code
         == 200
     )
     assert len(client.post("/matches").json()["jobs"]) == 1
-    client.put("/preferences", json={"families": ["Product Owner"], "employment": ["full-time"]})
+    client.put("/preferences", json={"families": ["AI Solutions & Implementation"], "employment": ["full-time"]})
     assert client.post("/matches").json()["jobs"] == []

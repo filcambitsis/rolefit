@@ -16,7 +16,7 @@ from .skills import mentions, normalize_skill
 
 # Bump this when extraction rules or the skills vocabulary change:
 # stored requirements with an older version are extracted again.
-PROMPT_VERSION = "evidence-v8"
+PROMPT_VERSION = "evidence-v9"
 MAX_TEXT = 150_000
 
 

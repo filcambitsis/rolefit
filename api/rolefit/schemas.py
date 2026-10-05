@@ -6,8 +6,10 @@ from .normalization import FAMILIES
 class Preferences(BaseModel):
     model_config = ConfigDict(extra="forbid")
     families: list[str] = Field(default_factory=list, max_length=len(FAMILIES))
-    employment: list[Literal["full-time", "part-time", "internship"]] = Field(
-        default_factory=lambda: ["full-time", "part-time", "internship"], min_length=1, max_length=3
+    employment: list[Literal["full-time", "part-time", "internship", "unknown"]] = Field(
+        default_factory=lambda: ["full-time", "part-time", "internship", "unknown"],
+        min_length=1,
+        max_length=4,
     )
     career_levels: list[Literal["junior", "mid", "senior", "lead", "unknown"]] = Field(
         default_factory=list, max_length=5

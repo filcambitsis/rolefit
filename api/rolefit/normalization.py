@@ -16,6 +16,11 @@ FAMILIES = [
     "AI Consultant",
     "Data Consultant",
     "Technology Consultant",
+    "AI & Automation Specialist",
+    "Solutions Engineer",
+    "Product Analyst",
+    "Business & Technology Analyst",
+    "Product Owner",
 ]
 
 
@@ -33,25 +38,43 @@ def content_hash(text: str) -> str:
 def family(title: str) -> str | None:
     """Role family from the job title, or None if the job is out of scope."""
     value = title.lower()
+    ai = bool(
+        re.search(r"\bai\b|artificial intelligence|machine learning|gen\s?ai|generative|\bllm\b", value)
+    )
+    if re.search(r"\bproduct owner\b", value):
+        return "Product Owner"
+    if re.search(r"\bproduct analyst\b", value):
+        return "Product Analyst"
+    if re.search(r"\b(?:business|technology|solutions?) analyst\b", value):
+        return "Business & Technology Analyst"
     if re.search(r"\b(?:consultant|consulting|advisor)\b", value):
-        if re.search(r"\bai\b|artificial intelligence|machine learning|generative", value):
+        if ai:
             return "AI Consultant"
         if re.search(r"\bdata\b|analytics|business intelligence", value):
             return "Data Consultant"
-        if re.search(r"technology|technical|digital|\bit\b|solutions?", value):
+        if re.search(r"technology|technical|digital|innovation|\bit\b|solutions?", value):
             return "Technology Consultant"
+    if ai and re.search(r"adoption|transformation|implementation", value):
+        return "AI Consultant"
+    if re.search(r"\bsolutions? (?:engineer|architect)\b", value):
+        return "Solutions Engineer"
+    # Industrial and QA automation are outside this app's software/data scope.
+    if re.search(r"automation", value) and re.search(r"industrial|plc|controls?|test|qa", value):
+        return None
+    if re.search(r"automation|\brpa\b", value) and re.search(
+        r"engineer|developer|specialist|workflow", value
+    ):
+        return "AI & Automation Specialist"
+    if ai and re.search(r"specialist", value) and not re.search(r"support|sales|recruit", value):
+        return "AI & Automation Specialist"
     if re.search(r"data scien|research scien|applied scien", value):
-        return FAMILIES[2]
-    if re.search(
-        r"data analyst|analytics engineer|business intelligence|product analyst|analytics analyst", value
-    ):
-        return FAMILIES[3]
+        return "Data Scientist"
+    if re.search(r"data analyst|analytics engineer|business intelligence|analytics analyst", value):
+        return "Data Analyst"
     if re.search(r"machine learning|\bml\b|mlops", value):
-        return FAMILIES[1]
-    if re.search(r"\bai\b|artificial intelligence|\bllm\b|generative|deep learning", value) and re.search(
-        r"engineer|developer", value
-    ):
-        return FAMILIES[0]
+        return "ML Engineer"
+    if (ai or "deep learning" in value) and re.search(r"engineer|developer", value):
+        return "AI Engineer"
     if re.search(r"\bdata (?:platform |warehouse )?engineer", value):
         return "Data Engineer"
     if re.search(

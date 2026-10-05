@@ -1,5 +1,5 @@
 {
-  "version": "reviewed-2",
+  "version": "reviewed-3",
   "note": "Hand-reviewed skill list. Aliases are matched as whole words, case-insensitive. Ambiguous short names such as Excel and Spark require skill-list or technical context in skills.py.",
   "skills": [
     {"id": "python", "label": "Python", "aliases": ["python", "python3"]},
@@ -78,6 +78,19 @@
     {"id": "transformers", "label": "Transformers", "aliases": ["transformer models", "transformers"]},
     {"id": "prompting", "label": "Prompt engineering", "aliases": ["prompt engineering", "prompt design"]},
     {"id": "agents", "label": "AI agents", "aliases": ["ai agents", "llm agents", "agentic"]},
-    {"id": "elasticsearch", "label": "Elasticsearch", "aliases": ["elasticsearch"]}
+    {"id": "elasticsearch", "label": "Elasticsearch", "aliases": ["elasticsearch"]},
+    {"id": "requirements", "label": "Requirements gathering", "aliases": ["requirements gathering", "requirements elicitation"]},
+    {"id": "process-mapping", "label": "Process mapping", "aliases": ["process mapping", "business process modelling", "business process modeling"]},
+    {"id": "user-stories", "label": "User stories", "aliases": ["user stories"]},
+    {"id": "backlog", "label": "Backlog management", "aliases": ["backlog management", "backlog prioritization", "backlog prioritisation"]},
+    {"id": "agile", "label": "Agile", "aliases": ["agile"]},
+    {"id": "scrum", "label": "Scrum", "aliases": ["scrum"]},
+    {"id": "jira", "label": "Jira", "aliases": ["jira"]},
+    {"id": "uipath", "label": "UiPath", "aliases": ["uipath"]},
+    {"id": "power-automate", "label": "Power Automate", "aliases": ["power automate"]},
+    {"id": "n8n", "label": "n8n", "aliases": ["n8n"]},
+    {"id": "zapier", "label": "Zapier", "aliases": ["zapier"]},
+    {"id": "change-management", "label": "Change management", "aliases": ["change management"]},
+    {"id": "genai", "label": "Generative AI", "aliases": ["generative ai", "genai"]}
   ]
 }

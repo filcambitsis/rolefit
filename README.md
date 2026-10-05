@@ -135,7 +135,7 @@ MIT licensed. Earlier research plans are preserved in [docs/archive](docs/archiv
 
 ## Netherlands-only scope
 
-RoleFit collects English-language AI, data and software listings from Eye Security, DataSnipper, IMC and TomTom. Remote roles must explicitly list the Netherlands as an allowed location. There are no country or city controls, LinkedIn/Indeed integrations, or pasted-job inputs. Unknown employment types remain excluded rather than guessed. Availability depends on current employer postings.
+RoleFit collects English-language AI, data, software, consulting, solutions and product listings from the employer boards in `data/seeds.json`. Remote roles must explicitly list the Netherlands as an allowed location. There are no country or city controls, LinkedIn/Indeed integrations, or pasted-job inputs. Jobs without employment information are labelled “Not specified”; that option is included by default and can be deselected. Availability depends on current employer postings.
 
 Career-level filters use explicit job-title cues (or internship employment type), not CV-based eligibility judgments. Unmarked titles are “Not specified”; junior/mid/senior levels are not guessed from missing information. The CV page offers a collapsed preview of extracted passages, with exact supporting quotes still available in job details.
 
@@ -144,3 +144,21 @@ Internship appears only under employment type. Career-level selections apply to 
 Role filters also include AI Consultant, Data Consultant and Technology Consultant. Available results depend on the employer boards; selecting a role does not guarantee vacancies.
 
 Matching is conservative: basic skill mentions can count, but advanced proficiency, production experience and either/or requirements remain unverified for manual review. Future learning intentions do not count as skills. The coverage percentage is a heuristic over extracted requirements, not a validated fit prediction.
+
+
+## Role title groups
+
+Preferences use broad groups rather than separate filters for every title variant:
+
+| Group | Examples |
+| --- | --- |
+| AI Engineer | Applied AI, GenAI, LLM Engineer |
+| AI & Automation Specialist | AI Specialist, Workflow Automation, RPA Engineer |
+| AI Consultant | AI Solutions, Implementation, Adoption, Data & AI Consultant |
+| Technology Consultant | Digital Transformation, Innovation Consultant |
+| Solutions Engineer | Solutions Engineer, Junior Solutions Architect |
+| Product Analyst | AI / Technical Product Analyst |
+| Business & Technology Analyst | Business Analyst, Technology Analyst, Solutions Analyst |
+| Product Owner | Junior / Technical / Data Product Owner |
+
+Existing data, ML and software groups remain available. Industrial/PLC and QA test automation are excluded. Seniority is a separate filter: adding architect titles does not label them junior. Sources are refreshed by `make refresh`; support for a group does not guarantee a current vacancy. Existing saved filters stay unchanged—reset preferences to include all new groups and unspecified employment.

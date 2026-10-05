@@ -52,6 +52,11 @@ export const families = [
   "AI Consultant",
   "Data Consultant",
   "Technology Consultant",
+  "AI & Automation Specialist",
+  "Solutions Engineer",
+  "Product Analyst",
+  "Business & Technology Analyst",
+  "Product Owner",
 ];
 export const careerLevels = [
   ["junior", "Junior / graduate"],
@@ -82,7 +87,7 @@ export function matchesCareerLevel(
 }
 export const defaults: Preferences = {
   families: [],
-  employment: ["full-time", "part-time", "internship"],
+  employment: ["full-time", "part-time", "internship", "unknown"],
   workplace: "any",
   career_levels: [],
   search: "",

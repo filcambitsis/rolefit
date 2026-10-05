@@ -213,7 +213,7 @@ async def crawl(db, seeds_path=None):
         and "NL" in j.countries
         and j.family in FAMILIES
         and j.language == "en"
-        and j.employment in ("full-time", "part-time", "internship")
+        and j.employment in ("full-time", "part-time", "internship", "unknown")
     ]
     report.update(
         eligible=len(eligible),

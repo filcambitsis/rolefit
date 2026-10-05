@@ -642,7 +642,9 @@ export default function Home() {
                               </span>
                               <span>
                                 <BriefcaseBusiness size={14} />
-                                {job.employment}
+                                {job.employment === "unknown"
+                                  ? "Employment not specified"
+                                  : job.employment}
                               </span>
                               <span className="workplace-tag">
                                 {job.workplace}
@@ -1009,27 +1011,28 @@ export default function Home() {
                         <h2>Employment and workplace</h2>
                         <label>Employment type</label>
                         <div className="choice-chips">
-                          {["full-time", "part-time", "internship"].map(
-                            (type) => (
-                              <button
-                                key={type}
-                                className={
-                                  prefs.employment.includes(type)
-                                    ? "chosen"
-                                    : ""
-                                }
-                                aria-pressed={prefs.employment.includes(type)}
-                                onClick={() =>
-                                  togglePreference("employment", type)
-                                }
-                              >
-                                {prefs.employment.includes(type) && (
-                                  <Check size={14} />
-                                )}{" "}
-                                {type}
-                              </button>
-                            ),
-                          )}
+                          {[
+                            "full-time",
+                            "part-time",
+                            "internship",
+                            "unknown",
+                          ].map((type) => (
+                            <button
+                              key={type}
+                              className={
+                                prefs.employment.includes(type) ? "chosen" : ""
+                              }
+                              aria-pressed={prefs.employment.includes(type)}
+                              onClick={() =>
+                                togglePreference("employment", type)
+                              }
+                            >
+                              {prefs.employment.includes(type) && (
+                                <Check size={14} />
+                              )}{" "}
+                              {type === "unknown" ? "Not specified" : type}
+                            </button>
+                          ))}
                         </div>
                         <label htmlFor="workplace">Work arrangement</label>
                         <select
@@ -1157,7 +1160,11 @@ export default function Home() {
                   <MapPin size={14} />
                   {selected.location}
                 </span>
-                <span>{selected.employment}</span>
+                <span>
+                  {selected.employment === "unknown"
+                    ? "Employment not specified"
+                    : selected.employment}
+                </span>
                 <span>{selected.workplace}</span>
               </div>
               <div className="detail-score">

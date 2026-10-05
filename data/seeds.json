@@ -19,5 +19,30 @@
     "board": "tomtom",
     "company": "TomTom",
     "region": "eu"
+  },
+  {
+    "provider": "ashby",
+    "board": "sentry",
+    "company": "Sentry"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "radixuniversity",
+    "company": "Radix Trading"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "dept",
+    "company": "DEPT"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "doitintl",
+    "company": "DoiT"
+  },
+  {
+    "provider": "greenhouse",
+    "board": "afam",
+    "company": "Anthos Fund & Asset Management"
   }
 ]

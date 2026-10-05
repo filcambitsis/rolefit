@@ -513,3 +513,65 @@ def test_all_role_preferences_are_accepted(client):
     from rolefit.normalization import FAMILIES
 
     assert client.put("/preferences", json={"families": FAMILIES}).status_code == 200
+
+
+@pytest.mark.parametrize(
+    "title,expected",
+    [
+        ("AI Automation Specialist", "AI & Automation Specialist"),
+        ("Workflow Automation Engineer", "AI & Automation Specialist"),
+        ("RPA Engineer", "AI & Automation Specialist"),
+        ("AI Solutions Engineer", "Solutions Engineer"),
+        ("Junior Solutions Architect", "Solutions Engineer"),
+        ("AI Solutions Consultant", "AI Consultant"),
+        ("AI Implementation Consultant", "AI Consultant"),
+        ("Data & AI Consultant", "AI Consultant"),
+        ("AI Adoption Specialist", "AI Consultant"),
+        ("GenAI Engineer", "AI Engineer"),
+        ("LLM Engineer", "AI Engineer"),
+        ("Applied AI Engineer", "AI Engineer"),
+        ("AI Product Analyst", "Product Analyst"),
+        ("Technical Product Analyst", "Product Analyst"),
+        ("Business Analyst - Data/AI", "Business & Technology Analyst"),
+        ("Business Technology Analyst", "Business & Technology Analyst"),
+        ("Technical Business Analyst", "Business & Technology Analyst"),
+        ("Solutions Analyst", "Business & Technology Analyst"),
+        ("Innovation Consultant", "Technology Consultant"),
+        ("Junior Product Owner - AI Products", "Product Owner"),
+        ("Industrial Automation Engineer", None),
+        ("QA Test Automation Engineer", None),
+        ("Technical Support Specialist (AI First)", None),
+    ],
+)
+def test_adjacent_role_titles(title, expected):
+    assert family(title) == expected
+
+
+def test_new_role_skills():
+    from rolefit.skills import mentions
+
+    assert set(mentions("Used Jira for user stories and requirements gathering")) == {
+        "Jira",
+        "User stories",
+        "Requirements gathering",
+    }
+    assert set(mentions("Built workflow automation using n8n and Power Automate")) == {
+        "n8n",
+        "Power Automate",
+    }
+
+
+def test_unspecified_employment_can_be_filtered(client, job, db):
+    client.post("/cv", files={"file": ("cv.txt", CV_TEXT)})
+    job.employment = "unknown"
+    job.family = "Product Owner"
+    db.commit()
+    assert (
+        client.put(
+            "/preferences", json={"families": ["Product Owner"], "employment": ["unknown"]}
+        ).status_code
+        == 200
+    )
+    assert len(client.post("/matches").json()["jobs"]) == 1
+    client.put("/preferences", json={"families": ["Product Owner"], "employment": ["full-time"]})
+    assert client.post("/matches").json()["jobs"] == []

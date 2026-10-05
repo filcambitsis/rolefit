@@ -619,3 +619,39 @@ def test_degree_subject_and_level_are_not_assumed():
 def test_bs_requirement_is_education():
     rows = extract_requirements("Requirements\nBS (or higher) in Computer Science, or a related field")
     assert rows[0]["category"] == "education"
+
+
+@pytest.mark.parametrize(
+    "date_range,status,tier",
+    [
+        ("Sep 2023 – Aug 2026", "met", "education"),
+        ("September 2023 - August 2026", "met", "education"),
+        ("Sep. 2023 to Aug. 2026", "met", "education"),
+        ("Sep 2023 – Dec 2026", "not_verified", "education_in_progress"),
+        ("Sep 2023 – Oct 2026", "not_verified", "education_review"),
+        ("2023 – 2025", "met", "education"),
+        ("Sep 2023 – Aug 2026 expected", "not_verified", "education_in_progress"),
+    ],
+)
+def test_degree_month_ranges(monkeypatch, date_range, status, tier):
+    import rolefit.matching as matching
+
+    class FixedDate:
+        @staticmethod
+        def now(tz):
+            return datetime(2026, 10, 5, tzinfo=tz)
+
+    monkeypatch.setattr(matching, "datetime", FixedDate)
+    raw = "EDUCATION\nBSc Artificial Intelligence " + date_range + " Relevant Coursework: Machine Learning"
+    rows = [SimpleNamespace(id=str(i), **r) for i, r in enumerate(extract_cv(raw)[0])]
+    req = SimpleNamespace(
+        id="r",
+        text="BS (or higher) in Computer Science, or a related field",
+        category="education",
+        skill=None,
+        required=True,
+    )
+    result = matching.match_requirement(req, rows, raw)
+    assert result["status"] == status
+    assert result["tier"] == tier
+    assert matching.requirement_score([result]) == (100 if status == "met" else 0)

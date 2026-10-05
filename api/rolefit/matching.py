@@ -47,6 +47,29 @@ def degree_level(text):
     return min(levels) if levels else None
 
 
+MONTHS = {
+    name: i
+    for i, name in enumerate(
+        ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"), 1
+    )
+}
+
+
+def degree_end_date(text):
+    """Return the end month of an education date range; year-only ends use December."""
+    month = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?"
+    match = re.search(
+        rf"\b(?:{month}\s+)?(?:19|20)\d{{2}}\s*(?:[-–—]|to)\s*"
+        rf"(?:(?P<month>{month})\s+)?(?P<year>(?:19|20)\d{{2}})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        return None
+    end_month = MONTHS[match["month"][:3].lower()] if match["month"] else 12
+    return int(match["year"]), end_month
+
+
 def education_match(text, valid, raw):
     """Recognise a small set of related computing degrees; retain exact CV text."""
     required_level = degree_level(text)
@@ -81,14 +104,14 @@ def education_match(text, valid, raw):
             re.I,
         )
         years = [int(year) for year in re.findall(r"\b(?:19|20)\d{2}\b", quote)]
-        current_year = datetime.now(timezone.utc).year
-        if ongoing or any(year > current_year for year in years):
+        today = datetime.now(timezone.utc)
+        current_month = (today.year, today.month)
+        end_date = degree_end_date(quote)
+        if ongoing or (end_date and end_date > current_month) or any(year > today.year for year in years):
             best = (passage, "education_in_progress", "Related degree in progress")
             continue
         completed = re.search(r"\b(?:graduated|completed|awarded|earned)\b", quote, re.I)
-        dated = bool(
-            re.search(r"\b(?:19|20)\d{2}\s*[-–—]\s*(?:19|20)\d{2}\b", quote) and max(years) < current_year
-        )
+        dated = bool(end_date and end_date < current_month)
         # Additional constraints such as grades or accreditation need manual review.
         extra = re.search(r"gpa|grade|honou?rs|accredited|\band\b|years?", text, re.I)
         if (completed or dated) and not extra:
